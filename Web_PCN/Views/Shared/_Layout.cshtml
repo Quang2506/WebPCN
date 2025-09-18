@@ -1,0 +1,43 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = ViewBag.Title ?? "PCN Home";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 3 CSS -->
+    <link href="~/Content/bootstrap3/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Site CSS -->
+    <link href="~/Content/Site.css" rel="stylesheet" />
+</head>
+<body class="sfc-body">
+    <div class="container-fluid sfc-shell">
+        <div class="row">
+            <!-- SIDEBAR -->
+            <aside class="col-sm-3 col-md-2 sfc-sidebar">
+                <div class="sfc-brand">P C N</div>
+                @Html.Action("LeftMenu", "Home")
+            </aside>
+
+            <!-- MAIN -->
+            <main class="col-sm-9 col-md-10 sfc-main">
+                <div class="sfc-topbar">
+                    <span class="sfc-topbar-title">@ViewBag.Title</span>
+                </div>
+                <div class="sfc-content">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- jQuery phải trước Bootstrap -->
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/bootstrap3/bootstrap.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

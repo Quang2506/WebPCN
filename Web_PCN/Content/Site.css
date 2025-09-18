@@ -1,0 +1,139 @@
+﻿/* ===== Reset nhẹ & layout gốc ===== */
+html, body {
+    height: 100%;
+}
+
+.sfc-body {
+    background: #0b1320;
+}
+/* fallback khi chưa load layout */
+.sfc-shell {
+    min-height: 100vh;
+}
+
+/* Bỏ padding mặc định container-fluid BS3 */
+.no-gutter {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+    .no-gutter > [class*="col-"] {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+/* ===== Sidebar ===== */
+.sfc-sidebar {
+    background: #0f172a; /* xanh đen */
+    color: #e5e7eb;
+    min-height: 100vh;
+    padding: 14px 12px;
+    border-right: 1px solid rgba(255,255,255,.08);
+}
+
+/* Brand text (thay cho logo) */
+.sfc-brand {
+    font-weight: 800;
+    letter-spacing: .35em;
+    text-align: center;
+    color: #60a5fa;
+    border: 1px solid rgba(96,165,250,.3);
+    border-radius: 10px;
+    padding: 10px 0;
+    margin-bottom: 16px;
+    user-select: none;
+}
+
+/* Menu list */
+.sfc-menu {
+    margin: 0;
+    padding: 4px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+    .sfc-menu::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .sfc-menu::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.15);
+        border-radius: 6px;
+    }
+
+    .sfc-menu:hover::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.25);
+    }
+
+    .sfc-menu > li > a {
+        color: #d1d5db;
+        background: transparent;
+        border-radius: 10px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all .15s ease;
+    }
+
+.sfc-menu__icon {
+    font-size: 13px;
+    width: 18px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.sfc-menu__text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sfc-menu > li > a:hover,
+.sfc-menu > li > a:focus {
+    color: #ffffff;
+    background: rgba(255,255,255,.07);
+    text-decoration: none;
+}
+
+.sfc-menu > li.active > a,
+.sfc-menu > li.active > a:hover,
+.sfc-menu > li.active > a:focus {
+    color: #ffffff;
+    background: linear-gradient(90deg,#2563eb 0%,#1e40af 100%);
+    box-shadow: 0 6px 14px rgba(37,99,235,.25);
+}
+
+.sfc-menu > li.active .sfc-menu__icon {
+    color: #fff;
+}
+
+/* ===== Main area ===== */
+.sfc-main {
+    background: #e9edf3; /* nền xám nhạt */
+    min-height: 100vh;
+}
+
+.sfc-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #dbe1ea;
+    padding: 10px 16px;
+}
+
+.sfc-topbar-title {
+    font-size: 14px;
+    color: #334155;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+.sfc-content {
+    padding: 24px;
+}
+
+/* Tiêu đề giữa trang Home (tuỳ view) */
+.sfc-welcome {
+    text-align: center;
+    margin-top: 40px;
+    color: #111827;
+}

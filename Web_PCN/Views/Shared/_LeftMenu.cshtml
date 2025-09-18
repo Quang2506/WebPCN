@@ -1,0 +1,14 @@
+﻿@model IEnumerable<Core.Dtos.MenuItem>
+
+<ul class="nav nav-pills nav-stacked sfc-menu">
+    @foreach (var m in Model)
+    {
+        var active = (Request != null && (Request.RawUrl ?? "").StartsWith(Url.Content(m.Url ?? ""), System.StringComparison.OrdinalIgnoreCase));
+        <li class="@(active ? "active" : "")">
+            <a href="@m.Url" title="@m.MenuText">
+                <span class="glyphicon glyphicon-cog sfc-menu__icon"></span>
+                <span class="sfc-menu__text">@m.MenuText</span>
+            </a>
+        </li>
+    }
+</ul>
