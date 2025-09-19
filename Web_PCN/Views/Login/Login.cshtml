@@ -1,0 +1,118 @@
+﻿﻿@using Web_PCN.Models.ViewModels
+@model LoginViewModel
+@{
+    Layout = "~/Views/Shared/_Layout_Login.cshtml";
+    ViewBag.Title = "Đăng nhập";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/Site_login.css" />
+}
+
+<section class="min-vh-100 d-flex align-items-center bg-auth">
+    <div class="container">
+        <div class="row g-0 shadow-lg rounded-4 overflow-hidden auth-wrapper mx-auto">
+            <!-- LEFT -->
+            <div class="col-lg-6 d-none d-lg-block auth-left">
+                <div class="p-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="brand-badge me-3"><i class="bi bi-laptop"></i></div>
+                        <div>
+                            <h4 class="mb-0 text-white">Quanta PCN</h4>
+                            <div class="text-white-50 small">Process Change Notice System</div>
+                        </div>
+                    </div>
+                    <h2 class="text-white fw-semibold lh-sm mb-3">PROCESS CHANGE NOTICE</h2>
+                    <ul class="list-unstyled text-white-50 mt-4 mb-0">
+                        <li class="mb-2"><i class="bi bi-check2-circle me-2 text-success"></i>PE/TE/AME/EQ/ME...</li>
+                        <li class="mb-2"><i class="bi bi-check2-circle me-2 text-success"></i>Synchronization between departments</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-lg-6 bg-white p-4 p-md-5">
+                <div class="text-center mb-4 d-lg-none">
+                    <div class="brand-badge brand-badge-sm mb-2"><i class="bi bi-laptop"></i></div>
+                    <h4 class="fw-bold mb-0">Quanta PCN</h4>
+                    <div class="text-muted small">SOP Information Page</div>
+                </div>
+
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <!-- Login (User Name) -->
+                    <div class="mb-3">
+                        <label class="form-label">User Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            @Html.TextBoxFor(m => m.Login, new
+                            {
+                                @class = "form-control",
+                                placeholder = "User_id / fullname / email",
+                                autocomplete = "username",
+                                inputmode = "text"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Login, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                            @Html.PasswordFor(m => m.Password, new
+                            {
+                                @class = "form-control",
+                                placeholder = "••••••••",
+                                autocomplete = "current-password",
+                                id = "pwd"
+                            })
+                            <button type="button" class="btn btn-outline-secondary" tabindex="-1"
+                                    aria-label="Hiện/ẩn mật khẩu" onclick="togglePwd()">
+                                <i id="eye" class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <!-- Remember / Forgot -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input", id = "remember" })
+                            <label class="form-check-label" for="remember">Remember</label>
+                        </div>
+                        <a href="#" class="small text-decoration-none">Forget?</a>
+                    </div>
+
+                    <!-- Submit -->
+                    <button class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+                            type="submit" id="btnLogin">
+                        <span>Login</span>
+                        <span class="spinner-border spinner-border-sm d-none" id="spin" role="status" aria-hidden="true"></span>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+    <script>
+        function togglePwd() {
+            const eye = document.getElementById('eye');
+            const pwd = document.getElementById('pwd');
+            if (!pwd) return;
+            if (pwd.type === 'password') { pwd.type = 'text'; eye.className = 'bi bi-eye'; }
+            else { pwd.type = 'password'; eye.className = 'bi bi-eye-slash'; }
+        }
+        document.getElementById('loginForm')?.addEventListener('submit', function () {
+            document.getElementById('spin')?.classList.remove('d-none');
+            document.getElementById('btnLogin')?.setAttribute('disabled', 'disabled');
+        });
+    </script>
+}

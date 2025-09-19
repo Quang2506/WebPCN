@@ -1,0 +1,60 @@
+﻿@model IEnumerable<Core.Dtos.ChangeRequestDto>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Lấy breadcrumb (đã set ở controller)
+    var parent = (Session["MenuParentName"] as string) ?? "";
+    var child = (Session["MenuChildName"] as string) ?? "";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>@parent → @child</strong>
+        <div class="pull-right">
+            <a class="btn btn-primary btn-xs"
+               href="@Url.Action("Create", "Page", new { p = parent, c = child })">
+                Create new request
+            </a>
+            <a class="btn btn-default btn-xs"
+               href="@Url.Action("Query", "Page", new { p = parent, c = child })">
+                Query
+            </a>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+    <div class="panel-body">
+        <h4>Pending request</h4>
+
+        @if (Model != null && Model.Any())
+        {
+            <table class="table table-bordered table-hover table-condensed">
+                <thead>
+                    <tr class="info">
+                        <th style="width:160px;">Code</th>
+                        <th style="width:90px;">Version</th>
+                        <th>Change title</th>
+                        <th style="width:150px;">Department</th>
+                        <th style="width:150px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td><a href="#">@r.Code</a></td>
+                            <td>@r.Version</td>
+                            <td class="text-danger">@r.ChangeTitle</td>
+                            <td>@r.Department</td>
+                            <td class="text-danger">@r.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-muted">No data.</div>
+        }
+    </div>
+</div>

@@ -41,7 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dtos\ChangeRequestDto.cs" />
+    <Compile Include="Dtos\LoginRequest.cs" />
+    <Compile Include="Dtos\LoginResult.cs" />
     <Compile Include="Dtos\MenuItem.cs" />
+    <Compile Include="Dtos\NavigationDtos.cs" />
+    <Compile Include="Dtos\QueryViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,0 +1,45 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = ViewBag.Title ?? "Đăng nhập";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/Site.css" />
+    @RenderSection("Styles", required: false)
+
+    <style>
+        html, body {
+            height: 100%;
+            overflow-x: hidden; /* fix khoảng trắng do tràn ngang */
+        }
+
+        body {
+            margin: 0;
+        }
+
+        main#auth-root {
+            min-height: 100vh;
+            width: 100vw; /* full viewport width */
+            display: block; /* KHÔNG dùng flex để khỏi co chiều ngang */
+        }
+    </style>
+
+</head>
+<body>
+    <!-- Không bọc container để thật sự full-bleed -->
+    <main id="auth-root">
+        @RenderBody()
+    </main>
+
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

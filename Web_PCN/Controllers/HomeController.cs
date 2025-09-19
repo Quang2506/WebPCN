@@ -5,7 +5,7 @@ namespace Web_PCN.Controllers
 {
     public class HomeController : Controller
     {
-        private const string DefaultTestUser = "UserA";   // user cố định để test
+        private const string DefaultTestUser = "V5030587";   // user cố định để test
         private readonly MenuService _menuService = new MenuService();
 
         

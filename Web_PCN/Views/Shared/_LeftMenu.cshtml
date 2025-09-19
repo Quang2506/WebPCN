@@ -1,36 +1,47 @@
 ﻿@model IEnumerable<Core.Dtos.MenuItem>
 @using System.Linq
 
-@helper RenderNode(Core.Dtos.MenuItem m)
+@{
+    // lấy id đang chọn từ Session (nếu có)
+    int? currentPid = Session["MenuParentId"] as int?;
+    int? currentCid = Session["MenuChildId"] as int?;
+}
+
+@helper RenderNode(Core.Dtos.MenuItem m, int? currentPid, int? currentCid)
 {
     var hasChildren = m.Children != null && m.Children.Count > 0;
-    var cid = "m_" + m.MenuID;
+    var cid = "m_" + m.MenuID; // id cho collapse
 
     if (hasChildren)
     {
-        <li class="sfc-parent">
-            <a href="#" class="sfc-parent__link"
+        var isOpen = (currentPid.HasValue && currentPid.Value == m.MenuID);
+        <li class="sfc-parent@(isOpen ? " open" : "")">
+            <a href="#@cid"
+               class="sfc-parent__link"
                data-toggle="collapse"
-               data-target="@("#" + cid)"
-               aria-expanded="false">
+               aria-expanded="@(isOpen.ToString().ToLower())"
+               aria-controls="@cid"
+               title="@m.MenuText">
                 <span class="glyphicon glyphicon-folder-open sfc-parent__icon"></span>
                 <span class="sfc-menu__text">@m.MenuText</span>
                 <span class="caret sfc-caret"></span>
             </a>
 
-            <ul id="@cid" class="collapse sfc-submenu">
-                @foreach (var c in m.Children)
+            <ul id="@cid" class="collapse sfc-submenu@(isOpen ? " in" : "")">
+                @foreach (var c in m.Children.OrderBy(x => x.Sort))
                 {
                     if (c.Children != null && c.Children.Count > 0)
                     {
-                        @RenderNode(c) <!-- có cháu nữa thì vẫn coi là CHA -->
+                        @RenderNode(c, currentPid, currentCid)
                     }
                     else
                     {
-                        <li class="sfc-leaf">
-                            <a href="@(string.IsNullOrEmpty(c.Url) ? "#" : Url.Content(c.Url))"
-                               title="@c.MenuText">
-                                <span class="sfc-menu__text">@c.MenuText</span>  <!-- KHÔNG icon cho CON -->
+
+                        var url = Url.Action("Index", "Page", new { p = m.MenuText, c = c.MenuText });
+                        var isActive = (currentCid.HasValue && currentCid.Value == c.MenuID);
+                        <li class="sfc-leaf@(isActive ? " active" : "")">
+                            <a href="@url" title="@c.MenuText">
+                                <span class="sfc-menu__text">@c.MenuText</span>
                             </a>
                         </li>
                     }
@@ -40,10 +51,12 @@
     }
     else
     {
-        <li class="sfc-leaf">
-            <a href="@(string.IsNullOrEmpty(m.Url) ? "#" : Url.Content(m.Url))"
-               title="@m.MenuText">
-                <span class="sfc-menu__text">@m.MenuText</span>  <!-- KHÔNG icon cho lá -->
+        // lá cấp 1
+        var url = Url.Action("Index", "Page", new { p = "", c = m.MenuText });
+        var isActive = (currentCid.HasValue && currentCid.Value == m.MenuID);
+        <li class="sfc-leaf@(isActive ? " active" : "")">
+            <a href="@url" title="@m.MenuText">
+                <span class="sfc-menu__text">@m.MenuText</span>
             </a>
         </li>
     }
@@ -52,9 +65,9 @@
 @if (Model != null && Model.Any())
 {
     <ul class="nav nav-pills nav-stacked sfc-menu">
-        @foreach (var m in Model)
+        @foreach (var m in Model.OrderBy(x => x.Sort))
         {
-            @RenderNode(m)
+            @RenderNode(m, currentPid, currentCid)
         }
     </ul>
 }
