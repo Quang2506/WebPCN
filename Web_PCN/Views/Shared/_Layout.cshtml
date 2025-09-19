@@ -4,8 +4,8 @@
     var title = ViewBag.Title as string ?? "PCN Home";
 
 
-    var userName = "UserA";
-    // var userName = Session["UserName"] as string; // đã lưu ở bước login  dùng để lấy section
+   // var userName = "UserA";
+     var userName = Session["UserName"] as string; // đã lưu ở bước login  dùng để lấy section
 }
 <!DOCTYPE html>
 <html>
@@ -18,15 +18,20 @@
     <link href="~/Content/bootstrap3/css/bootstrap.min.css" rel="stylesheet" />
     <!-- Site CSS -->
     <link href="~/Content/Site.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+
 </head>
 <body class="sfc-body">
     <div class="container-fluid sfc-shell">
         <div class="row">
             <!-- SIDEBAR -->
-            <aside class="col-sm-3 col-md-2 sfc-sidebar">
-                <div class="sfc-brand">P C N</div>
-                @Html.Action("LeftMenu", "Home")
-            </aside>
+            @if (Request.IsAuthenticated)
+            {
+                <aside class="col-sm-3 col-md-2 sfc-sidebar">
+                    @Html.Action("LeftMenu", "Home")   <!-- hoặc @Html.Partial("_LeftMenu") -->
+                </aside>
+            }
+
 
             <!-- MAIN -->
             <main class="col-sm-9 col-md-10 sfc-main">

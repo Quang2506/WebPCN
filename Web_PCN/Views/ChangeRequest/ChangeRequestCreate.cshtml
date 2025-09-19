@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "ChangeRequestCreate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/changerequest.css" />
+}
+
+<div class="page">
+
+    <!-- Breadcrumb & Header -->
+    <div class="breadcrumb">
+        <a href="@Url.Action("Index","Home")">Home</a> / <a href="#">Change Request</a> / <span>New</span>
+    </div>
+
+    <div class="page-header">
+        <div class="page-title">Change Request / New</div>
+        <div class="header-actions">
+            <button type="button" class="btn btn-outline" onclick="history.back()">Quay lại</button>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('crForm').requestSubmit()">Lưu</button>
+        </div>
+    </div>
+
+    @* FORM *@
+    <form id="crForm" method="post" action='@Url.Action("Create","ChangeRequest")' enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <div class="content-grid">
+            <!-- Left: Main form -->
+            <div>
+                <div class="card">
+                    <div class="card-title">Thông tin yêu cầu</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="CategoryText">Category:</label>
+                            <input type="text" id="CategoryText" name="CategoryText" placeholder="VD: CR-2025-001" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="DocCode">Document Code:</label>
+                            <input type="text" id="DocCode" name="DocCode" placeholder="VD: CR-2025-001" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Version">Version</label>
+                            <input type="text" id="Version" name="Version" placeholder="Input Version..." />
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="ChangeTitle">Change Title</label>
+                            <input type="text" id="ChangeTitle" name="ChangeTitle" placeholder="Nhập tiêu đề..." />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Model">Model</label>
+                            <select id="Model" name="Model">
+                                <option value="">— Select —</option>
+                                <option value="bug">Sửa lỗi</option>
+                                <option value="feature">Tính năng mới</option>
+                                <option value="improve">Cải tiến</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Priority">Department group</label>
+                            <select id="Priority" name="Priority">
+                                <option value="">— Chọn mức —</option>
+                                <option value="low">Thấp</option>
+                                <option value="medium">Trung bình</option>
+                                <option value="high">Cao</option>
+                                <option value="urgent">Khẩn</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Requester">Người yêu cầu</label>
+                            <input type="text" id="Requester" name="Requester" placeholder="Họ tên..." />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="RequestDate">Ngày yêu cầu</label>
+                            <input type="date" id="RequestDate" name="RequestDate" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Status">Trạng thái</label>
+                            <select id="Status" name="Status">
+                                <option value="new">Mới</option>
+                                <option value="inprogress">Đang xử lý</option>
+                                <option value="done">Hoàn tất</option>
+                                <option value="cancelled">Hủy</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="Description">Mô tả</label>
+                            <textarea id="Description" name="Description" placeholder="Mô tả chi tiết yêu cầu..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div class="card">
+                    <div class="card-title">Đính kèm</div>
+                    <div class="dropzone">
+                        Kéo & thả tệp vào đây hoặc chọn tệp để tải lên.
+                        <div style="margin-top:10px">
+                            <input type="file" id="Files" name="Files" multiple />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="card">
+                    <div class="card-title">Ghi chú/Bình luận</div>
+                    <div class="form-group">
+                        <textarea id="Comments" name="Comments" placeholder="Nhập bình luận nội bộ hoặc ghi chú bổ sung..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="footer-actions">
+                    <button class="btn btn-outline" type="button" onclick="history.back()">Hủy</button>
+                    <button class="btn btn-primary" type="submit">Lưu</button>
+                    <button class="btn btn-success" type="button" onclick="submitForApproval()">Gửi duyệt</button>
+                </div>
+            </div>
+
+            @* Right summary (đang ẩn theo mẫu cũ) *@
+            @* <aside> ... </aside> *@
+        </div>
+    </form>
+</div>

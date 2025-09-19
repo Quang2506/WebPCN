@@ -13,7 +13,7 @@ namespace Data.Repositories
             using (var conn = Db.GetConnection())
             {
                 return conn.Query<MenuItem>(
-                    "dbo.TestMenu",
+                    "dbo.PCN_MenuList",
                     new { functionType = "getlistmenu", UserName = userName },
                     commandType: CommandType.StoredProcedure
                 );

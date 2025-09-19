@@ -1,0 +1,380 @@
+﻿/* =========================================================
+   SITE CSS — Quanta PCN (Login-only)
+   - Dùng Bootstrap 5
+   - Giữ style cơ bản + bố cục trang đăng nhập (auth)
+   ========================================================= */
+
+/* ---------- 1) Theme variables ---------- */
+:root {
+    /* Palette xanh–đen */
+    --bg-1: #0f1b2d;
+    --bg-2: #0f2036;
+    --bg-3: #0c1c2e;
+    --accent-blue: #2563eb; /* primary start */
+    --accent-cyan: #06b6d4; /* primary end   */
+    --badge-blue: #2f7df3;
+    --badge-cyan: #22d3ee;
+    --text-strong: #eef2f7;
+    --text-muted: #9fb1c3;
+    --border-light: rgba(255,255,255,.08);
+    --shadow-strong: 0 30px 80px rgba(0,0,0,.35);
+}
+
+/* ---------- 2) Base tweaks (giữ chuẩn Bootstrap) ---------- */
+/* Giữ padding/spacing giống template MVC */
+.body-content {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Description list không bị truncate ở cột trái */
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Không giới hạn width cho input toàn cục (tránh phá Bootstrap).
+   Nếu có form cũ cần max-width, hãy bọc bằng lớp .form-narrow rồi đặt max-width bên trong. */
+/* .form-narrow input, .form-narrow select, .form-narrow textarea{ max-width:280px; } */
+
+/* ---------- 3) Auth (login) layout ---------- */
+
+/* Nền xanh–đen (sáng hơn nhẹ) */
+/* Nền xanh-đen + ảnh MacBook mờ */
+/* Nền xanh-đen + ảnh MacBook mờ */
+.bg-auth {
+    position: relative;
+    background: linear-gradient(135deg, rgba(15,27,45,0.85), rgba(12,28,46,0.85)), url('images/quanta_bg.png') center/cover no-repeat;
+    backdrop-filter: blur(6px);
+}
+
+
+/* Khối card lớn ở giữa */
+.auth-wrapper {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid var(--border-light);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-strong);
+    background: transparent; /* wrapper chỉ là khung */
+}
+
+/* Panel trái (branding) */
+.auth-left {
+    background: radial-gradient(900px 450px at -10% -10%, rgba(59,130,246,.40) 0, transparent 60%), radial-gradient(900px 450px at 120% 120%, rgba(34,197,94,.36) 0, transparent 60%), linear-gradient(135deg, #13243a, #0f1c2f);
+    color: var(--text-strong);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Nới padding ở màn lớn để cân đối khối trái/phải */
+@media (min-width: 992px) {
+    .auth-left {
+        padding: 64px !important;
+    }
+    /* p-5 ~ 48px, tăng nhẹ cho thoáng */
+}
+
+/* Huy hiệu icon (laptop) */
+.brand-badge,
+.brand-badge-sm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--badge-blue), var(--badge-cyan));
+    box-shadow: 0 14px 28px rgba(47,125,243,.35);
+    border-radius: 16px;
+}
+
+.brand-badge {
+    width: 56px;
+    height: 56px;
+    font-size: 26px;
+}
+
+.brand-badge-sm {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+}
+
+/* Card form (cột phải) bo tròn nhẹ + border sáng */
+.col-lg-6.bg-white,
+.col-lg-7.bg-white {
+    border-radius: 1.25rem;
+    border: 1px solid rgba(0,0,0,.06);
+}
+
+/* ---------- 4) Controls & buttons ---------- */
+
+/* Nút chính gradient xanh tươi */
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+    border: none;
+}
+
+    .btn-primary:hover {
+        filter: brightness(1.07);
+    }
+
+/* Input group bo góc đều, không hở viền giữa addon và input */
+.input-group .form-control,
+.input-group .btn,
+.input-group .input-group-text {
+    border-radius: .5rem;
+}
+
+.input-group .input-group-text {
+    border-right: 0;
+}
+
+.input-group .form-control {
+    border-left: 0;
+}
+
+/* Focus ring nhẹ nhàng cho input/btn (hòa cùng chủ đề) */
+.form-control:focus,
+.form-select:focus,
+.btn:focus {
+    box-shadow: 0 0 0 .2rem rgba(37,99,235,.25);
+    outline: 0;
+    border-color: var(--accent-blue);
+}
+
+/* ---------- 5) Responsive ---------- */
+@media (max-width: 991.98px) {
+    .auth-wrapper {
+        max-width: 560px;
+    }
+}
+
+/* ---------- 6) Optional: dark-mode hệ thống (nếu áp dụng layout khác) ---------- */
+@media (prefers-color-scheme: dark) {
+    /* Giữ nguyên nền xanh–đen cho login; có thể tinh chỉnh thêm nếu có page khác */
+}
+
+
+
+
+
+/* ====== Dashboard styles ====== */
+.card-glass {
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: .75rem;
+    color: #eaf0f6;
+}
+
+.legend .legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: .35rem;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.25) inset;
+}
+
+/* title nhã */
+.panel-title {
+    color: #eaf0f6;
+    font-weight: 600;
+    letter-spacing: .3px
+}
+
+/* --- Piping canvas --- */
+.pipe-canvas {
+    height: 640px;
+    background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.0));
+    border-radius: .75rem;
+    padding: 10px;
+    position: relative;
+    overflow: auto;
+}
+
+/* ===== PIPES & FLOW ===== */
+.pipe-main, .pipe-branch {
+    fill: #ffd9a3;
+    stroke: #caa574;
+    stroke-width: 4;
+    stroke-dasharray: 30 15; /* vạch ống */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+}
+
+.flow {
+    animation: flowMove 3s linear infinite;
+}
+
+@keyframes flowMove {
+    from {
+        stroke-dashoffset: 0
+    }
+
+    to {
+        stroke-dashoffset: -45
+    }
+}
+
+/* Hộp khu vực */
+.unit-box .unit-bg {
+    fill: rgba(0,0,0,.28);
+    stroke: rgba(255,255,255,.18);
+    stroke-width: 1
+}
+
+.unit-title {
+    fill: #dbeafe;
+    font-size: 16px;
+    font-weight: 600
+}
+
+.unit-card {
+    fill: #173955;
+    stroke: #2b5676;
+    stroke-width: 1
+}
+
+    .unit-card.dashed {
+        stroke-dasharray: 4 3
+    }
+
+.unit-kv {
+    fill: #a3c2d9;
+    font-size: 13px
+}
+
+/* Van & đồng hồ */
+.valve {
+    fill: #b91c1c;
+    stroke: #ef4444;
+    stroke-width: 3
+}
+
+.valve-x {
+    stroke: #ef4444;
+    stroke-width: 3
+}
+
+.gauge-bg {
+    fill: #0e2438;
+    stroke: #153a5c;
+    stroke-width: 2
+}
+
+.gauge-face {
+    fill: #e6f3ff
+}
+
+.gauge-needle {
+    stroke: #f43f5e;
+    stroke-width: 3;
+    stroke-linecap: round
+}
+
+.gauge-label {
+    fill: #a0c4e3;
+    font-size: 12px
+}
+
+/* unit boxes */
+.unit-box .unit-bg {
+    fill: rgba(0,0,0,.28);
+    stroke: rgba(255,255,255,.18);
+    stroke-width: 1;
+}
+
+.unit-title {
+    fill: #dbeafe;
+    font-size: 16px;
+    font-weight: 600
+}
+
+.unit-card {
+    fill: #173955;
+    stroke: #2b5676;
+    stroke-width: 1
+}
+
+    .unit-card.dashed {
+        stroke-dasharray: 4 3
+    }
+
+.unit-kv {
+    fill: #a3c2d9;
+    font-size: 13px
+}
+
+/* valve */
+.valve {
+    fill: #b91c1c;
+    stroke: #ef4444;
+    stroke-width: 3
+}
+
+.valve-x {
+    stroke: #ef4444;
+    stroke-width: 3
+}
+
+/* gauge */
+.gauge-bg {
+    fill: #0e2438;
+    stroke: #153a5c;
+    stroke-width: 2
+}
+
+.gauge-face {
+    fill: #e6f3ff
+}
+
+.gauge-needle {
+    stroke: #f43f5e;
+    stroke-width: 3
+}
+
+.gauge-label {
+    fill: #a0c4e3;
+    font-size: 12px
+}
+
+/* --- Status grid (right) --- */
+.grid-status {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(54px,1fr));
+    gap: .5rem;
+}
+
+.status-chip {
+    text-align: center;
+    padding: .4rem 0;
+    border-radius: .5rem;
+    font-weight: 600;
+    color: #0a1627;
+    user-select: none;
+    border: 1px solid rgba(255,255,255,.15);
+}
+
+.status-green {
+    background: #22c55e;
+}
+
+.status-gray {
+    background: #9ca3af;
+}
+
+.status-yellow {
+    background: #f59e0b;
+}
+
+/* tối ưu cho màn nhỏ */
+@media (max-width: 991.98px) {
+    .pipe-canvas {
+        height: 420px;
+    }
+
+    .grid-status {
+        grid-template-columns: repeat(4, minmax(54px,1fr));
+    }
+}
