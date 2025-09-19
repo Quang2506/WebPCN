@@ -1,25 +1,39 @@
 ﻿using System.Web.Mvc;
 using Services;
-using Core.Dtos;
 
 namespace Web_PCN.Controllers
 {
     public class HomeController : Controller
     {
+        private const string DefaultTestUser = "UserA";   // user cố định để test
         private readonly MenuService _menuService = new MenuService();
+
+        
+        private string GetCurrentUser()
+        {
+            var u = Session["UserName"] as string;
+            if (string.IsNullOrWhiteSpace(u))
+            {
+                u = DefaultTestUser;
+                Session["UserName"] = u; 
+            }
+            return u;
+        }
 
         public ActionResult Index()
         {
-            ViewBag.Title = "PCN Home";
+            ViewBag.Title = "PNC Home";
+            
+            var user = GetCurrentUser(); 
             return View();
         }
 
         [ChildActionOnly]
         public PartialViewResult LeftMenu()
         {
-            int userId = 1; // sau này lấy từ session
-            var menu = _menuService.GetMenu(userId);
-            return PartialView("_LeftMenu", menu);
+            var user = GetCurrentUser(); // luôn có giá trị (UserA khi chưa login)
+            var tree = _menuService.GetMenuTree(user); // SP sẽ lọc theo user
+            return PartialView("_LeftMenu", tree);
         }
     }
 }

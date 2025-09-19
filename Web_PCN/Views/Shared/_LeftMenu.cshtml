@@ -1,14 +1,60 @@
 ﻿@model IEnumerable<Core.Dtos.MenuItem>
+@using System.Linq
 
-<ul class="nav nav-pills nav-stacked sfc-menu">
-    @foreach (var m in Model)
+@helper RenderNode(Core.Dtos.MenuItem m)
+{
+    var hasChildren = m.Children != null && m.Children.Count > 0;
+    var cid = "m_" + m.MenuID;
+
+    if (hasChildren)
     {
-        var active = (Request != null && (Request.RawUrl ?? "").StartsWith(Url.Content(m.Url ?? ""), System.StringComparison.OrdinalIgnoreCase));
-        <li class="@(active ? "active" : "")">
-            <a href="@m.Url" title="@m.MenuText">
-                <span class="glyphicon glyphicon-cog sfc-menu__icon"></span>
+        <li class="sfc-parent">
+            <a href="#" class="sfc-parent__link"
+               data-toggle="collapse"
+               data-target="@("#" + cid)"
+               aria-expanded="false">
+                <span class="glyphicon glyphicon-folder-open sfc-parent__icon"></span>
                 <span class="sfc-menu__text">@m.MenuText</span>
+                <span class="caret sfc-caret"></span>
+            </a>
+
+            <ul id="@cid" class="collapse sfc-submenu">
+                @foreach (var c in m.Children)
+                {
+                    if (c.Children != null && c.Children.Count > 0)
+                    {
+                        @RenderNode(c) <!-- có cháu nữa thì vẫn coi là CHA -->
+                    }
+                    else
+                    {
+                        <li class="sfc-leaf">
+                            <a href="@(string.IsNullOrEmpty(c.Url) ? "#" : Url.Content(c.Url))"
+                               title="@c.MenuText">
+                                <span class="sfc-menu__text">@c.MenuText</span>  <!-- KHÔNG icon cho CON -->
+                            </a>
+                        </li>
+                    }
+                }
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="sfc-leaf">
+            <a href="@(string.IsNullOrEmpty(m.Url) ? "#" : Url.Content(m.Url))"
+               title="@m.MenuText">
+                <span class="sfc-menu__text">@m.MenuText</span>  <!-- KHÔNG icon cho lá -->
             </a>
         </li>
     }
-</ul>
+}
+
+@if (Model != null && Model.Any())
+{
+    <ul class="nav nav-pills nav-stacked sfc-menu">
+        @foreach (var m in Model)
+        {
+            @RenderNode(m)
+        }
+    </ul>
+}
