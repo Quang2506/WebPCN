@@ -1,11 +1,18 @@
-﻿
-@{
+﻿@{
     Layout = null;
     var title = ViewBag.Title as string ?? "PCN Home";
 
+    // đã lưu ở bước login  dùng để lấy session
+    var userName = Session["UserName"] as string;
 
-   // var userName = "UserA";
-     var userName = Session["UserName"] as string; // đã lưu ở bước login  dùng để lấy section
+    // === CỜ TÙY CHỌN: Chỉ trang nào set cờ này mới áp dụng thay đổi ===
+    bool hideLeft = (ViewBag.HideLeftMenu as bool?) == true;
+
+    // Lớp cột cho MAIN: khi ẩn sidebar => full width
+    string mainCols = hideLeft ? "col-sm-12 col-md-12" : "col-sm-9 col-md-10";
+
+    // Body class: chỉ khi hideLeft=true mới kích hoạt chế độ "main scroll"
+    string bodyClass = hideLeft ? "sfc-body sfc-body--main-scroll" : "sfc-body";
 }
 <!DOCTYPE html>
 <html>
@@ -20,21 +27,41 @@
     <link href="~/Content/Site.css" rel="stylesheet" />
     @RenderSection("Styles", required: false)
 
+    <style>
+        /* ============================
+           Tối thiểu, chỉ tác động khi body có class .sfc-body--main-scroll
+           => các trang cũ không bị ảnh hưởng.
+           ============================ */
+        .sfc-body--main-scroll {
+            overflow: hidden;                 /* khóa cuộn toàn trang */
+            background: #eef1f6;              /* đồng bộ nền mới */
+        }
+        .sfc-body--main-scroll .sfc-shell {
+            height: 100vh;                    /* khung làm việc */
+        }
+        .sfc-body--main-scroll .sfc-main {
+            height: 100%;
+            overflow: auto;                   /* CHỈ main cuộn */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Khi ẩn sidebar (hideLeft=true), co giãn lưới bootstrap tối thiểu */
+
+    </style>
 </head>
-<body class="sfc-body">
+<body class="@bodyClass">
     <div class="container-fluid sfc-shell">
         <div class="row">
             <!-- SIDEBAR -->
-            @if (Request.IsAuthenticated)
+            @if (Request.IsAuthenticated && !hideLeft)
             {
                 <aside class="col-sm-3 col-md-2 sfc-sidebar">
                     @Html.Action("LeftMenu", "Home")   <!-- hoặc @Html.Partial("_LeftMenu") -->
                 </aside>
             }
 
-
             <!-- MAIN -->
-            <main class="col-sm-9 col-md-10 sfc-main">
+            <main class="@mainCols sfc-main">
                 <!-- Topbar -->
                 <div class="sfc-topbar clearfix">
                     <span class="sfc-topbar-title">@title</span>
@@ -46,35 +73,33 @@
                 <!-- Content -->
                 <div class="sfc-content">
                     @RenderBody()
-
-
-
                 </div>
             </main>
         </div>
     </div>
 
-
     <script src="~/Scripts/jquery-3.4.1.min.js"></script>
     <script src="~/Scripts/bootstrap3/bootstrap.min.js"></script>
     @RenderSection("scripts", required: false)
+
+    <script>
+        (function () {
+            // Đảm bảo chỉ mở 1 nhóm con trong .sfc-menu
+            $(document).on('click', '.sfc-parent__link', function () {
+                var $link = $(this);
+                var target = $($link.data('target'));
+                var $siblings = $link.closest('ul.sfc-menu, ul.sfc-submenu')
+                    .find('> li > ul.collapse').not(target);
+                $siblings.collapse('hide'); // đóng các nhóm khác
+            });
+
+            // Cập nhật aria-expanded để CSS caret xoay
+            $('.sfc-menu').on('shown.bs.collapse hidden.bs.collapse', function (e) {
+                var $ul = $(e.target);
+                var $a = $('a[data-target="#' + $ul.attr('id') + '"]');
+                $a.attr('aria-expanded', $ul.hasClass('in'));
+            });
+        })();
+    </script>
 </body>
 </html>
-<script>
-    (function () {
-        // Đảm bảo chỉ mở 1 nhóm con trong .sfc-menu
-        $(document).on('click', '.sfc-parent__link', function () {
-            var $link = $(this);
-            var target = $($link.data('target'));
-            var $siblings = $link.closest('ul.sfc-menu, ul.sfc-submenu').find('> li > ul.collapse').not(target);
-            $siblings.collapse('hide'); // đóng các nhóm khác
-        });
-
-        // Cập nhật aria-expanded để CSS caret xoay
-        $('.sfc-menu').on('shown.bs.collapse hidden.bs.collapse', function (e) {
-            var $ul = $(e.target);
-            var $a = $('a[data-target="#' + $ul.attr('id') + '"]');
-            $a.attr('aria-expanded', $ul.hasClass('in'));
-        });
-    })();
-</script>

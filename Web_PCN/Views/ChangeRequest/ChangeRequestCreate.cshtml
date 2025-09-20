@@ -7,49 +7,55 @@
     <link rel="stylesheet" href="~/Content/changerequest.css" />
 }
 
-<div class="page">
+<div class="page page--scroll">
 
     <!-- Breadcrumb & Header -->
-    <div class="breadcrumb">
-        <a href="@Url.Action("Index","Home")">Home</a> / <a href="#">Change Request</a> / <span>New</span>
-    </div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="@Url.Action("Index","Home")">Home</a>
+        <a href="@Url.Action("Index","ChangeRequest")">Change Request</a>
+        <span aria-current="page">New</span>
+    </nav>
 
-    <div class="page-header">
+    <header class="page-header">
         <div class="page-title">Change Request / New</div>
         <div class="header-actions">
             <button type="button" class="btn btn-outline" onclick="history.back()">Quay lại</button>
             <button type="button" class="btn btn-primary" onclick="document.getElementById('crForm').requestSubmit()">Lưu</button>
         </div>
-    </div>
+    </header>
 
     @* FORM *@
-    <form id="crForm" method="post" action='@Url.Action("Create","ChangeRequest")' enctype="multipart/form-data">
+    <form id="crForm" method="post" action='@Url.Action("Create","ChangeRequest")' enctype="multipart/form-data" novalidate>
         @Html.AntiForgeryToken()
 
         <div class="content-grid">
             <!-- Left: Main form -->
-            <div>
+            <section aria-label="Form chính">
+                <!-- Section: Thông tin yêu cầu -->
                 <div class="card">
                     <div class="card-title">Thông tin yêu cầu</div>
+
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="CategoryText">Category:</label>
-                            <input type="text" id="CategoryText" name="CategoryText" placeholder="VD: CR-2025-001" />
+                            <label for="CategoryText">Category</label>
+                            <input type="text" id="CategoryText" name="CategoryText" placeholder="VD: Change Management" />
+                            <small class="hint">Nhóm phân loại thay đổi.</small>
                         </div>
 
                         <div class="form-group">
-                            <label for="DocCode">Document Code:</label>
-                            <input type="text" id="DocCode" name="DocCode" placeholder="VD: CR-2025-001" />
+                            <label for="DocCode">Document Code</label>
+                            <input type="text" id="DocCode" name="DocCode" placeholder="VD: CR-2025-001" required />
+                            <small class="hint">Mã hồ sơ, bắt buộc.</small>
                         </div>
 
                         <div class="form-group">
                             <label for="Version">Version</label>
-                            <input type="text" id="Version" name="Version" placeholder="Input Version..." />
+                            <input type="text" id="Version" name="Version" placeholder="VD: v1.0" />
                         </div>
 
-                        <div class="form-group" style="grid-column: 1 / -1;">
+                        <div class="form-group full">
                             <label for="ChangeTitle">Change Title</label>
-                            <input type="text" id="ChangeTitle" name="ChangeTitle" placeholder="Nhập tiêu đề..." />
+                            <input type="text" id="ChangeTitle" name="ChangeTitle" placeholder="Nhập tiêu đề..." required />
                         </div>
 
                         <div class="form-group">
@@ -93,17 +99,17 @@
                             </select>
                         </div>
 
-                        <div class="form-group" style="grid-column: 1 / -1;">
+                        <div class="form-group full">
                             <label for="Description">Mô tả</label>
                             <textarea id="Description" name="Description" placeholder="Mô tả chi tiết yêu cầu..."></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Attachments -->
+                <!-- Section: Đính kèm -->
                 <div class="card">
                     <div class="card-title">Đính kèm</div>
-                    <div class="dropzone">
+                    <div class="dropzone" id="dz" tabindex="0">
                         Kéo & thả tệp vào đây hoặc chọn tệp để tải lên.
                         <div style="margin-top:10px">
                             <input type="file" id="Files" name="Files" multiple />
@@ -111,24 +117,99 @@
                     </div>
                 </div>
 
-                <!-- Comments -->
+                <!-- Section: Ghi chú -->
                 <div class="card">
-                    <div class="card-title">Ghi chú/Bình luận</div>
+                    <div class="card-title">Ghi chú / Bình luận</div>
                     <div class="form-group">
                         <textarea id="Comments" name="Comments" placeholder="Nhập bình luận nội bộ hoặc ghi chú bổ sung..."></textarea>
                     </div>
                 </div>
 
-                <!-- Footer Actions -->
-                <div class="footer-actions">
+                <!-- Sticky Footer Actions -->
+                <div class="footer-actions footer-actions--sticky">
                     <button class="btn btn-outline" type="button" onclick="history.back()">Hủy</button>
                     <button class="btn btn-primary" type="submit">Lưu</button>
                     <button class="btn btn-success" type="button" onclick="submitForApproval()">Gửi duyệt</button>
                 </div>
-            </div>
+            </section>
 
-            @* Right summary (đang ẩn theo mẫu cũ) *@
-            @* <aside> ... </aside> *@
+            <!-- Right: Summary -->
+            <aside aria-label="Tóm tắt" class="aside">
+                <div class="card">
+                    <div class="card-title">Tóm tắt</div>
+                    <div class="summary">
+                        <div class="row">
+                            <div class="label">Mã hồ sơ</div>
+                            <div class="value" id="sumDocCode">—</div>
+                        </div>
+                        <div class="row">
+                            <div class="label">Tiêu đề</div>
+                            <div class="value" id="sumTitle">—</div>
+                        </div>
+                        <div class="row">
+                            <div class="label">Model</div>
+                            <div class="value" id="sumModel">—</div>
+                        </div>
+                        <div class="row">
+                            <div class="label">Trạng thái</div>
+                            <div class="value" id="sumStatus">Mới</div>
+                        </div>
+                        <div class="row">
+                            <div class="label">Ngày yêu cầu</div>
+                            <div class="value" id="sumDate">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Mẹo nhập nhanh</div>
+                    <ul class="tips">
+                        <li>Điền <strong>DocCode</strong> & <strong>Title</strong> trước.</li>
+                        <li>Đính kèm bằng kéo-thả hoặc chọn tệp.</li>
+                        <li>Dùng <em>Gửi duyệt</em> khi đã kiểm tra đầy đủ.</li>
+                    </ul>
+                </div>
+            </aside>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        // Cập nhật panel tóm tắt bên phải theo thời gian thực
+        (function () {
+            const bind = (id, target) => {
+                const el = document.getElementById(id);
+                const out = document.getElementById(target);
+                if (!el || !out) return;
+                const set = () => out.textContent = el.value || '—';
+                el.addEventListener('input', set);
+                set();
+            };
+            bind('DocCode', 'sumDocCode');
+            bind('ChangeTitle', 'sumTitle');
+            bind('Model', 'sumModel');
+            bind('Status', 'sumStatus');
+            (function () {
+                const el = document.getElementById('RequestDate');
+                const out = document.getElementById('sumDate');
+                if (!el || !out) return;
+                const set = () => out.textContent = el.value || '—';
+                el.addEventListener('change', set);
+                set();
+            })();
+
+            // Drag-over nhẹ cho dropzone
+            const dz = document.getElementById('dz');
+            if (dz) {
+                ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('dragover'); }));
+                ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('dragover'); }));
+            }
+        })();
+
+        function submitForApproval() {
+            // TODO: thay bằng logic thực tế (modal/confirm)
+            document.getElementById('crForm').requestSubmit();
+        }
+    </script>
+}

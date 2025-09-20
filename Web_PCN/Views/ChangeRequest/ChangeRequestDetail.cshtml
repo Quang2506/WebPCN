@@ -1,558 +1,122 @@
-﻿
-
-@model Core.Dtos.ChangeRequests
-
+﻿@model Core.Dtos.ChangeRequests
 @{
     ViewBag.Title = "ChangeRequestDetail";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewBag.Title</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+@section Styles {
+    <link rel="stylesheet" href="~/Content/changerequest.detail.css" />
+}
 
-    <style>
-        :root {
-            /* Có thể đổi nhanh bảng màu ở đây */
-            --bg: #e8ebf1; /* nền tổng thể (gần giống ảnh) */
-            --surface: #ffffff; /* nền card */
-            --primary: #4a8ccf; /* màu chủ đạo (nút/header) */
-            --border: #cacccf; /* viền nhạt */
-            --muted: #828d9c; /* chữ phụ/placeholder */
-            --dark: #243243; /* chữ chính */
-            --hl: #f2f5fb; /* nền header bảng */
-            --danger: #e55353; /* cảnh báo */
-            --success: #22a06b; /* thành công */
-        }
+<div class="page page--scroll">
 
-        * {
-            box-sizing: border-box;
-        }
+    @* XÓA header/breadcrumb: không render *@
+    @* <nav class="breadcrumb">...</nav>
+        <header class="page-header">...</header> *@
 
-        html, body {
-            height: 100%;
-        }
+    <form id="crForm" method="post" action="@Url.Action("Create","ChangeRequest")" enctype="multipart/form-data" novalidate>
+        @Html.AntiForgeryToken()
 
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--dark);
-            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.45;
-        }
+        <div class="content-grid">
+            <!-- LEFT: Main form -->
+            <section aria-label="Chi tiết yêu cầu">
+                <div class="card">
+                    <div class="card-title">Thông tin yêu cầu</div>
 
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .page {
-            max-width: 1280px;
-            margin: 24px auto;
-            padding: 0 16px;
-        }
-
-        /* Breadcrumb + tiêu đề */
-        .breadcrumb {
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
-
-            .breadcrumb a {
-                color: var(--muted);
-            }
-
-        .page-header {
-            background: var(--primary);
-            color: #fff;
-            border-radius: 12px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(36,50,67,0.12);
-        }
-
-        .page-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Toolbar (search + filter) */
-        .toolbar {
-            margin-top: 16px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-            display: grid;
-            grid-template-columns: 1fr repeat(3, max-content);
-            gap: 10px;
-            align-items: center;
-        }
-
-            .search-input input,
-            .toolbar select {
-                width: 100%;
-                padding: 10px 12px;
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                background: #f7f8fb;
-                color: var(--dark);
-            }
-
-        /* Card/Form */
-        /*.content-grid {
-            display: grid;
-            grid-template-columns: 1fr 340px;*/ /* form trái, tóm tắt phải */
-        /*gap: 16px;
-            margin-top: 16px;
-        }*/
-
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) clamp(260px, 24vw, 320px);
-            /*grid-template-columns: minmax(0, 1fr) clamp(280px, 30vw, 360px);*/
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-            .content-grid > * {
-                min-width: 0;
-            }
-
-
-
-        .form-grid > * {
-            min-width: 0;
-        }
-
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(36,50,67,0.06);
-        }
-
-            .card + .card {
-                margin-top: 16px;
-            }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 12px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(240px, 1fr));
-            gap: 14px 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-            .form-group label {
-                font-size: 12.5px;
-                color: var(--muted);
-            }
-
-            .form-group input[type="text"],
-            .form-group input[type="date"],
-            .form-group input[type="number"],
-            .form-group select,
-            .form-group textarea {
-                padding: 10px 12px;
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                background: #f7f8fb;
-                color: var(--dark);
-                outline: none;
-            }
-
-            .form-group textarea {
-                min-height: 96px;
-                resize: vertical;
-            }
-
-        /* Attachments */
-        .dropzone {
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            padding: 16px;
-            background: #fbfcfe;
-            text-align: center;
-            color: var(--muted);
-        }
-
-        /* Table (Items) */
-        .table-wrap {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: var(--hl);
-        }
-
-        th, td {
-            font-size: 14px;
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        th {
-            text-align: left;
-            font-weight: 600;
-        }
-
-        tr:hover td {
-            background: #fafbfe;
-        }
-
-        .td-actions {
-            white-space: nowrap;
-        }
-
-        /* Summary (panel phải) */
-        .summary {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-            .summary .row {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 8px 10px;
-                border: 1px dashed var(--border);
-                border-radius: 10px;
-                background: #f7f9fd;
-            }
-
-            .summary .label {
-                color: var(--muted);
-                font-size: 13px;
-            }
-
-            .summary .value {
-                font-weight: 700;
-            }
-
-        /* Footer actions */
-        .footer-actions {
-            margin-top: 16px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        /* Buttons */
-        .btn {
-            border: none;
-            border-radius: 8px;
-            padding: 10px 14px;
-            cursor: pointer;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            background: #e9ecf3;
-            color: var(--dark);
-        }
-
-        .btn-outline {
-            background: #fff;
-            border: 1px solid var(--border);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: #fff;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: #fff;
-        }
-
-        .btn-link {
-            background: transparent;
-            color: var(--primary);
-        }
-
-        /* Responsive */
-
-        @@media (max-width: 1366px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /*  @@media (max-width: 1080px) {
-            .content-grid { grid-template-columns: 1fr; }
-        }*/
-        @@media (max-width: 920px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .toolbar {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-
-<h2>ChangeRequestDetail</h2>
-
-<body>
-    <div class="page">
-
-        <!-- Breadcrumb & Header -->
-        <div class="breadcrumb">
-            <a href="@Url.Action("Index","Home")">Home</a> / <a href="#">Change Request</a> / <span>New</span>
-        </div>
-        <div class="page-header">
-            <div class="page-title">Change Request / New</div>
-            <div class="header-actions">
-                <button type="button" class="btn btn-outline" onclick="history.back()">Quay lại</button>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('crForm').requestSubmit()">Lưu</button>
-            </div>
-        </div>
-
-        <!-- Toolbar -->
-        @*<div class="toolbar">
-                <div class="search-input">
-                    <input type="text" id="q" name="q" placeholder="Tìm kiếm..." />
-                </div>
-                <select id="tbStatus">
-                    <option value="">— Trạng thái —</option>
-                    <option value="new">Mới</option>
-                    <option value="inprogress">Đang xử lý</option>
-                    <option value="done">Hoàn tất</option>
-                    <option value="cancelled">Hủy</option>
-                </select>
-                <select id="tbCategory">
-                    <option value="">— Loại —</option>
-                    <option value="bug">Sửa lỗi</option>
-                    <option value="feature">Tính năng mới</option>
-                    <option value="improve">Cải tiến</option>
-                </select>
-                <button class="btn btn-outline" type="button" onclick="applyFilter()">Lọc</button>
-            </div>*@
-
-        <!-- FORM + SUMMARY -->
-        @* Nếu có model mạnh kiểu: @using (Html.BeginForm("Create","ChangeRequest", FormMethod.Post)) { ... } *@
-        <form id="crForm" method="post" action="@Url.Action("Create","ChangeRequest")" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-
-            <div class="content-grid">
-                <!-- Left: Main form -->
-                <div>
-                    <!-- General info -->
-                    <div class="card">
-                        <div class="card-title">Thông tin yêu cầu</div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="Code">Category:</label>
-                                <input type="text" id="Category" name="Code" placeholder="VD: CR-2025-001" />
-                            </div>
-                            <div class="form-group">
-                                <label for="Code">Document Code:</label>
-                                @Html.TextBoxFor(m => m.DocumentCode, new { @class = "form-control" })
-                                @* <input type="text" id="Code" name="Code" placeholder="VD: CR-2025-001" />*@
-                            </div>
-                            <div class="form-group">
-                                <label for="Title">Version</label>
-                                @Html.TextBoxFor(m => m.version, new { @class = "form-control" })
-                                @*<input type="text" id="Title" name="Title" placeholder="Input Version..." />*@
-                            </div>
-
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="Title">Change Title</label>
-                                @Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control" })
-                               @* <input type="text" id="Title" name="Title" placeholder="Nhập tiêu đề..." />*@
-                            </div>
-
-                            <div class="form-group">
-                                <label for="Category">Model</label>
-
-                                @Html.DropDownListFor(m => m.Model, (SelectList)ViewBag.ModelList, "-- Select --", new { @class = "form-control" })
-
-
-                                @*<select id="Category" name="Category">
-            <option value="">— Select —</option>
-            <option value="bug">Sửa lỗi</option>
-            <option value="feature">Tính năng mới</option>
-            <option value="improve">Cải tiến</option>
-        </select>*@
-                            </div>
-
-                            <div class="form-group">
-                                <label for="Department">Department group</label>
-                                <p class="form-control-static">@Model.group_dept</p>
-       
-                            </div>
-
-                            <div class="form-group">
-                                <label for="Requester">Người yêu cầu</label>
-                                <p class="form-control-static">@Model.pms_i_usr</p>
-                            </div>
-
-
-                            <div class="form-group">
-                                <label for="RequestDate">Ngày tạo</label>
-                                <p class="form-control-static">@Model.pms_i_ymd</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="Status">Trạng thái</label>
-                                <p class="form-control-static">@Model.Status</p>
-
-                            </div>
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label for="Description">Mô tả</label>
-                                @Html.TextAreaFor(m => m.Request_detail)
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Attachments -->
-                    <div class="card">
-                        <div class="card-title">Đính kèm</div>
-                        <div class="dropzone">
-                            Kéo & thả tệp vào đây hoặc chọn tệp để tải lên.
-                            <div style="margin-top:10px">
-                                <input type="file" id="Files" name="Files" multiple />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Items Table -->
-                    <!--<div class="card">
-                        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-                            <span>Danh sách hạng mục</span>
-                            <div style="display:flex;gap:8px;">
-                                <button class="btn btn-outline" type="button" onclick="addRow()">+ Thêm dòng</button>
-                                <button class="btn btn-link" type="button" onclick="clearAllRows()">Xoá tất cả</button>
-                            </div>
-                        </div>
-                        <div class="table-wrap">
-                            <table id="itemsTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width:64px;">#</th>
-                                        <th style="width:140px;">Mã</th>
-                                        <th>Hạng mục</th>
-                                        <th style="width:120px;">Số lượng</th>
-                                        <th style="width:120px;">Đơn vị</th>
-                                        <th style="width:140px;">Đơn giá</th>
-                                        <th style="width:140px;">Thành tiền</th>
-                                        <th style="width:200px;">Ghi chú</th>
-                                        <th style="width:110px;">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="itemBody">-->
-                    <!-- Dòng mẫu khởi tạo -->
-                    <!--<tr>
-                                        <td class="line-no">1</td>
-                                        <td><input type="text" name="Items[0].Code" placeholder="Item-001" /></td>
-                                        <td><input type="text" name="Items[0].Name" placeholder="Tên hạng mục" /></td>
-                                        <td><input type="number" min="0" step="1" name="Items[0].Qty" value="1" oninput="updateLineAmount(this)" /></td>
-                                        <td><input type="text" name="Items[0].Uom" placeholder="cái" /></td>
-                                        <td><input type="number" min="0" step="0.01" name="Items[0].UnitPrice" value="0" oninput="updateLineAmount(this)" /></td>
-                                        <td><input type="number" name="Items[0].Amount" value="0" readonly /></td>
-                                        <td><input type="text" name="Items[0].Note" placeholder="..." /></td>
-                                        <td class="td-actions">
-                                            <button class="btn btn-outline" type="button" onclick="duplicateRow(this)">Nhân bản</button>
-                                            <button class="btn btn-danger" type="button" onclick="removeRow(this)">Xoá</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>-->
-                    <!-- Comments -->
-                    <div class="card">
-                        <div class="card-title">Ghi chú/Bình luận</div>
+                    <div class="form-grid">
                         <div class="form-group">
-                            <textarea id="Comments" name="Comments" placeholder="Nhập bình luận nội bộ hoặc ghi chú bổ sung..."></textarea>
+                            <label for="Category">Category</label>
+                            <input id="Category" name="Code" type="text" placeholder="VD: Change Management" />
                         </div>
-                    </div>
 
-                    <!-- Footer Actions -->
-                    <div class="footer-actions">
-                        <button class="btn btn-outline" type="button" onclick="history.back()">Hủy</button>
-                        <button class="btn btn-primary" type="submit">Lưu</button>
-                        <button class="btn btn-success" type="button" onclick="submitForApproval()">Gửi duyệt</button>
+                        <div class="form-group">
+                            <label for="DocumentCode">Document Code</label>
+                            @Html.TextBoxFor(m => m.DocumentCode, new { @id = "DocumentCode", @class = "form-control", placeholder = "VD: CR-2025-001" })
+                        </div>
+
+                        <div class="form-group">
+                            <label for="version">Version</label>
+                            @Html.TextBoxFor(m => m.version, new { @id = "version", @class = "form-control", placeholder = "VD: v1.0" })
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="ChangeTitle">Change Title</label>
+                            @Html.TextBoxFor(m => m.ChangeTitle, new { @id = "ChangeTitle", @class = "form-control", placeholder = "Nhập tiêu đề..." })
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Model">Model</label>
+                            @Html.DropDownListFor(m => m.Model, (SelectList)ViewBag.ModelList, "-- Select --", new { @id = "Model", @class = "form-control" })
+                        </div>
+
+                        <div class="form-group">
+                            <label>Department group</label>
+                            <p class="form-control-static">@Model.group_dept</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Người yêu cầu</label>
+                            <p class="form-control-static">@Model.pms_i_usr</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ngày tạo</label>
+                            <p class="form-control-static">@Model.pms_i_ymd</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <p class="form-control-static">@Model.Status</p>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="Request_detail">Mô tả</label>
+                            @Html.TextAreaFor(m => m.Request_detail, new { @id = "Request_detail", @rows = "5", @class = "form-control", placeholder = "Mô tả chi tiết..." })
+                        </div>
                     </div>
                 </div>
 
-                <!-- Right: Summary -->
-                @*<aside>
-                        <div class="card">
-                            <div class="card-title">Tóm tắt</div>
-                            <div class="summary">
-                                <div class="row">
-                                    <div class="label">Tổng dòng</div>
-                                    <div class="value" id="sumLines">1</div>
-                                </div>
-                                <div class="row">
-                                    <div class="label">Tổng số lượng</div>
-                                    <div class="value" id="sumQty">1</div>
-                                </div>
-                                <div class="row">
-                                    <div class="label">Tổng tiền</div>
-                                    <div class="value" id="sumAmount">0</div>
-                                </div>
-                            </div>
+                <div class="card">
+                    <div class="card-title">Đính kèm</div>
+                    <div class="dropzone" id="dz">
+                        Kéo & thả tệp vào đây hoặc chọn tệp để tải lên.
+                        <div style="margin-top:10px">
+                            <input type="file" id="Files" name="Files" multiple />
                         </div>
+                    </div>
+                </div>
 
-                        <div class="card">
-                            <div class="card-title">Thông tin quy trình</div>
-                            <div class="form-group">
-                                <label>Người tạo</label>
-                                <input type="text" value="@User?.Identity?.Name" readonly />
-                            </div>
-                            <div class="form-group">
-                                <label>Ngày tạo</label>
-                                <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" readonly />
-                            </div>
-                            <div class="form-group">
-                                <label>Phiên bản</label>
-                                <input type="text" value="Draft" readonly />
-                            </div>
-                        </div>
-                    </aside>*@
-            </div>
-        </form>
-    </div>
+                <div class="card">
+                    <div class="card-title">Ghi chú/Bình luận</div>
+                    <div class="form-group">
+                        <textarea id="Comments" name="Comments" placeholder="Nhập bình luận nội bộ hoặc ghi chú bổ sung..." rows="4"></textarea>
+                    </div>
+                </div>
 
-</body>
+                <!-- Sticky Footer Actions -->
+                <div class="footer-actions footer-actions--sticky">
+                    <button class="btn btn-outline" type="button" onclick="history.back()">Hủy</button>
+                    <button class="btn btn-primary" type="submit">Lưu</button>
+                    <button class="btn btn-success" type="button" onclick="submitForApproval()">Gửi duyệt</button>
+                </div>
+            </section>
 
+            @* RIGHT summary đã bỏ; nếu sau cần lại có thể thêm <aside> *@
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function submitForApproval() {
+            document.getElementById('crForm').requestSubmit();
+        }
+        // dragover effect
+        (function () {
+            const dz = document.getElementById('dz');
+            if (!dz) return;
+            ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('dragover'); }));
+            ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('dragover'); }));
+        })();
+    </script>
+}

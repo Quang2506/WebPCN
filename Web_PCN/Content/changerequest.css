@@ -507,3 +507,200 @@ tbody tr:hover td {
         font-size: 20px
     }
 }
+
+
+/* === Bổ sung cho bố cục mới === */
+
+/* Cột phải rõ ràng hơn trên desktop */
+.aside {
+    position: relative;
+}
+
+/* Ô full width trong grid form (thay inline style) */
+.form-grid .full {
+    grid-column: 1 / -1;
+}
+
+/* Sticky action bar (nằm trong form, không che nội dung) */
+.footer-actions--sticky {
+    position: sticky;
+    bottom: 12px;
+    z-index: 5;
+    background: linear-gradient(180deg, rgba(255,255,255,.0) 0%, rgba(255,255,255,.85) 40%, rgba(255,255,255,.98) 100%);
+    backdrop-filter: blur(4px);
+    border-radius: var(--radius);
+    padding: 10px;
+    box-shadow: 0 6px 22px rgba(31,42,55,.08);
+    border: 1px solid var(--border);
+}
+
+/* Danh sách mẹo gọn gàng */
+.tips {
+    margin: 0;
+    padding-left: 18px;
+    color: #61718a;
+    line-height: 1.6;
+}
+
+    .tips li + li {
+        margin-top: 6px;
+    }
+
+/* Cải thiện breadcrumb cuối (span) */
+.breadcrumb span {
+    color: var(--dark);
+    font-weight: 600;
+}
+
+/* Nhỏ: tránh méo layout khi thiếu cột bên phải */
+@media (max-width:1366px) {
+    .aside {
+        order: 2;
+    }
+}
+
+/* === 1 cột: ẩn aside và cho form full width === */
+.content-grid {
+    grid-template-columns: 1fr !important;
+}
+
+.aside {
+    display: none !important;
+}
+
+/* Sticky action bar căn mép container đẹp hơn khi 1 cột */
+.footer-actions--sticky {
+    bottom: 16px;
+    margin-right: 0; /* đảm bảo không chừa khoảng trống bên phải */
+}
+
+/* Card phải bớt bo/gờ vì giờ không còn cột phải */
+.card + .card {
+    margin-top: 18px;
+}
+
+
+/* 1) Ẩn breadcrumb + header (vùng khoanh đỏ) */
+.breadcrumb,
+.page-header {
+    display: none !important;
+}
+
+/* Kéo nội dung lên sát hơn */
+.page {
+    margin-top: 8px !important;
+}
+
+/* 2) Thu hẹp khoảng cách giữa các trường */
+.form-grid {
+    gap: 10px 12px !important;
+}
+/* từ 16px -> 10/12 */
+.form-group {
+    gap: 6px !important;
+}
+    /* label sát input hơn */
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+        padding: 9px 10px !important; /* nhỏ hơn 11/12px */
+        border-radius: 8px; /* gọn hơn */
+    }
+
+    .form-group textarea {
+        min-height: 96px;
+    }
+
+/* Card & nút gọn lại */
+.card {
+    padding: 14px !important;
+}
+
+    .card + .card {
+        margin-top: 12px !important;
+    }
+
+.footer-actions {
+    margin-top: 12px !important;
+    gap: 8px !important;
+}
+
+.btn {
+    padding: 8px 14px !important;
+}
+
+/* 3) Chỉ khung nội dung bên phải cuộn (không cuộn left tree)
+   -> biến .page thành một viewport có thanh cuộn riêng */
+.page {
+    height: calc(100vh - 24px); /* trừ viền/top margin tùy layout của bạn */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Nếu bạn có sticky action bar thì vẫn dính trong vùng cuộn này */
+.footer-actions--sticky {
+    bottom: 12px;
+}
+
+.page--scroll {
+    height: calc(100vh - 24px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* COMPACT MODE – thu hẹp dọc & ngang */
+.form-grid {
+    row-gap: 3px !important; /* khoảng cách theo hàng (trên–dưới) */
+    column-gap: 10px !important; /* khoảng cách theo cột (trái–phải) */
+}
+
+.form-group {
+    gap: 4px !important; /* label gần input hơn */
+    margin: 0 !important; /* bỏ dư thừa khoảng cách dọc */
+}
+
+    .form-group label {
+        font-size: 11.5px !important;
+        letter-spacing: .1px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+        padding: 7px 10px !important; /* nhỏ hơn nữa (trước đó 9–11px) */
+        border-radius: 7px !important;
+        line-height: 1.35 !important;
+    }
+
+    .form-group textarea {
+        min-height: 84px !important; /* gọn hơn */
+    }
+
+/* Card gọn lại một chút */
+.card {
+    padding: 12px !important;
+}
+
+    .card + .card {
+        margin-top: 10px !important;
+    }
+
+
+/* Đẩy lên khỏi đáy thêm 20px (tùy chỉnh con số) */
+.footer-actions--sticky {
+    bottom: 24px !important; /* ví dụ: từ 12px -> 24px */
+}
+
+/* Chừa không gian phía dưới để nội dung cuối không bị che */
+.page {
+    padding-bottom: 88px !important; /* >= chiều cao sticky bar + khoảng cách */
+    /* nếu bạn đã set height/overflow cho .page rồi thì giữ nguyên */
+}
