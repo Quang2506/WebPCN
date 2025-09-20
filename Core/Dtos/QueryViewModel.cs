@@ -10,7 +10,8 @@ namespace Core.Dtos
         public string ChangeTitle { get; set; }
         public string Status { get; set; }
 
-   
+        public int? ParentId { get; set; }
+        public int? ChildId { get; set; }
         public IEnumerable<ChangeRequestDto> Results { get; set; }
 
   

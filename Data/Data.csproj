@@ -52,6 +52,7 @@
     <Compile Include="Repositories\IAuthRepository.cs" />
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Repositories\PageRepository.cs" />
+    <Compile Include="Repositories\WorkFlowRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">

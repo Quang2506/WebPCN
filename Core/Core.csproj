@@ -48,6 +48,7 @@
     <Compile Include="Dtos\MenuItem.cs" />
     <Compile Include="Dtos\NavigationDtos.cs" />
     <Compile Include="Dtos\QueryViewModel.cs" />
+    <Compile Include="Dtos\WorkFlow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

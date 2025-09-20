@@ -124,6 +124,7 @@
     <Compile Include="Controllers\ChangeRequestController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PageController.cs" />
+    <Compile Include="Controllers\WorkFlowController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -194,6 +195,7 @@
     <Content Include="Views\ChangeRequest\ChangeRequestCreate.cshtml" />
     <Content Include="Views\ChangeRequest\ChangeRequestDetail.cshtml" />
     <Content Include="Views\Shared\_Layout_Login.cshtml" />
+    <Content Include="Views\WorkFlow\JobStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,35 +1,30 @@
 ﻿@model IEnumerable<Core.Dtos.MenuItem>
 @using System.Linq
-
 @{
-    // Lấy node đang chọn (để mở đúng nhánh, highlight item)
+    // Id menu cha/con hiện tại để mở nhánh & highlight
     int? currentPid = Session["MenuParentId"] as int?;
     int? currentCid = Session["MenuChildId"] as int?;
 }
-
 @helper RenderNode(Core.Dtos.MenuItem m, int? currentPid, int? currentCid)
 {
     var hasChildren = m.Children != null && m.Children.Count > 0;
-    var cid = "m_" + m.MenuID; // id cho collapse
-
+    var cidHtmlId = "m_" + m.MenuID; // id cho collapse
     if (hasChildren)
     {
         var isOpen = (currentPid.HasValue && currentPid.Value == m.MenuID);
-
         <li class="sfc-parent@(isOpen ? " open" : "")">
-            <a href="#@cid"
+            <a href="#@cidHtmlId"
                class="sfc-parent__link"
                data-toggle="collapse"
                aria-expanded="@(isOpen.ToString().ToLower())"
-               aria-controls="@cid"
+               aria-controls="@cidHtmlId"
                title="@m.MenuText">
                 <span class="glyphicon glyphicon-folder-open sfc-parent__icon"></span>
                 <span class="sfc-menu__text">@m.MenuText</span>
                 <span class="caret sfc-caret"></span>
             </a>
-
-            <!-- LƯU Ý: thêm class sfc-tree ở mọi UL con -->
-            <ul id="@cid" class="collapse sfc-submenu sfc-tree@(isOpen ? " in" : "")">
+            @* LƯU Ý: mọi UL con đều có class sfc-tree *@
+            <ul id="@cidHtmlId" class="collapse sfc-submenu sfc-tree@(isOpen ? " in" : "")">
                 @foreach (var c in m.Children.OrderBy(x => x.Sort))
                 {
                     if (c.Children != null && c.Children.Count > 0)
@@ -38,9 +33,12 @@
                     }
                     else
                     {
-                        var url = Url.Action("Index", "Page", new { p = m.MenuText, c = c.MenuText });
+                        // Pending mặc định: truyền cả tên & id cha/con
+                        var url = Url.Action(
+                            "Index", "Page",
+                            new { p = m.MenuText, c = c.MenuText, pid = m.MenuID, cid = c.MenuID }
+                        );
                         var isActive = (currentCid.HasValue && currentCid.Value == c.MenuID);
-
                         <li class="sfc-leaf@(isActive ? " active" : "")">
                             <a href="@url" title="@c.MenuText">
                                 <span class="sfc-menu__text">@c.MenuText</span>
@@ -53,10 +51,12 @@
     }
     else
     {
-        // Lá cấp 1 (ít dùng, nhưng để cho đầy đủ)
-        var url = Url.Action("Index", "Page", new { p = "", c = m.MenuText });
+        // Trường hợp là lá cấp 1 (hiếm dùng): truyền cid là chính nó, pid null
+        var url = Url.Action(
+            "Index", "Page",
+            new { p = "", c = m.MenuText, pid = (int?)null, cid = m.MenuID }
+        );
         var isActive = (currentCid.HasValue && currentCid.Value == m.MenuID);
-
         <li class="sfc-leaf@(isActive ? " active" : "")">
             <a href="@url" title="@m.MenuText">
                 <span class="sfc-menu__text">@m.MenuText</span>
@@ -64,10 +64,9 @@
         </li>
     }
 }
-
 @if (Model != null && Model.Any())
 {
-    <!-- UL gốc cũng cần sfc-tree -->
+    @* UL gốc cũng cần sfc-tree để vẽ nét đứt *@
     <ul class="nav nav-pills nav-stacked sfc-menu sfc-tree">
         @foreach (var m in Model.OrderBy(x => x.Sort))
         {

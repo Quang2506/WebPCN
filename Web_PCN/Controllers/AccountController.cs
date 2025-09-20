@@ -21,7 +21,7 @@ namespace Web_PCN.Controllers
         [AllowAnonymous]
         public ActionResult Login()
         {
-            // View đang đặt tại Views/Login/Login.cshtml -> chỉ rõ đường dẫn tuyệt đối
+           
             return View("~/Views/Login/Login.cshtml", new LoginViewModel());
         }
 
@@ -39,7 +39,7 @@ namespace Web_PCN.Controllers
             var rs = await _authService.LoginAsync(dto);
             if (rs == null || rs.StatusCode != 0)
             {
-                ModelState.AddModelError("", rs?.Message ?? "Đăng nhập thất bại.");
+                ModelState.AddModelError("", rs?.Message ?? "Login fail!");
                 return View("~/Views/Login/Login.cshtml", vm);
             }
 

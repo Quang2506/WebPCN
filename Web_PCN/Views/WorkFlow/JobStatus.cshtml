@@ -1,0 +1,318 @@
+﻿@model List<Core.Dtos.WorkFlow>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var statuses = Model.Select(m => m.Status).ToList();
+    // Tạo chuỗi JSON thủ công từ danh sách statuses
+    var statusesJson = "[" + string.Join(",", statuses) + "]";
+    var hasRejectStatus = statuses.Contains(6);
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="mb-4">
+                <button id="backButton" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
+            <h1 class="text-center mb-4 mb">Work Flow</h1>
+            <div class="workflow-container">
+
+                <!-- CREATE -->
+                <div class="workflow-item">
+                    <div class="workflow-label">Created:</div>
+                    <div class="workflow-content">
+                        <div class="workflow-card card border-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start ml">
+                                    <h5 class="card-title">
+                                        @($"{Model.FirstOrDefault(m => m.Status == 2)?.Confirm_per}")
+                                    </h5>
+                                    <span class="badge bg-success">@($"{Model.FirstOrDefault(m => m.Status == 2)?.Status_nm}") </span>
+                                </div>
+                                <p class="card-text text-muted small mb-0 ml mt">
+                                    @($"{Model.FirstOrDefault(m => m.Status == 2)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workflow-arrow" data-next-status="3">
+                    <div class="arrow-line"></div>
+                    <div class="arrow-head"></div>
+                </div>
+
+                @if (hasRejectStatus)
+                {
+                    <div class="workflow-item">
+                        <div class="workflow-label">Reject:</div>
+                        <div class="workflow-content">
+                            <div class="workflow-card card border-info">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start ml">
+                                        <h5 class="card-title">
+                                            @($"{Model.FirstOrDefault(m => m.Status == 6)?.Confirm_per}")
+                                        </h5>
+                                        <span class="badge bg-info"> @($"{Model.FirstOrDefault(m => m.Status == 6)?.Status_nm}")</span>
+                                    </div>
+                                    <p class="card-text text-muted small mb-0 ml mt">@($"{Model.FirstOrDefault(m => m.Status == 6)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- APPROVAL -->
+                    if (statuses.Contains(3))
+                    {
+                        <div class="workflow-item">
+                            <div class="workflow-label">Approved:</div>
+                            <div class="workflow-content">
+                                <div class="workflow-card card border-warning">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start ml">
+                                            <h5 class="card-title">
+                                                @($"{Model.FirstOrDefault(m => m.Status == 3)?.Confirm_per}")
+                                            </h5>
+                                            <span class="badge bg-warning">@($"{Model.FirstOrDefault(m => m.Status == 3)?.Status_nm}")</span>
+                                        </div>
+                                        <p class="card-text text-muted small mb-0 ml mt">@($"{Model.FirstOrDefault(m => m.Status == 3)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="workflow-arrow" data-next-status="5">
+                            <div class="arrow-line"></div>
+                            <div class="arrow-head"></div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="workflow-item">
+                            <div class="workflow-label">Approved:</div>
+                            <div class="workflow-content">
+                                <div class="workflow-card card border-warning">
+                                    <div class="card-body"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="workflow-arrow" data-next-status="5">
+                            <div class="arrow-line"></div>
+                            <div class="arrow-head"></div>
+                        </div>
+                    }
+
+
+                    <!-- SYNC -->
+                    if (statuses.Contains(5))
+                    {
+                        <div class="workflow-item">
+                            <div class="workflow-label">Synced:</div>
+                            <div class="workflow-content">
+                                <div class="workflow-card card border-info">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start ml">
+                                            <h5 class="card-title">
+                                                @($"{Model.FirstOrDefault(m => m.Status == 5)?.Confirm_per}")
+                                            </h5>
+                                            <span class="badge bg-info"> @($"{Model.FirstOrDefault(m => m.Status == 5)?.Status_nm}")</span>
+                                        </div>
+                                        <p class="card-text text-muted small mb-0 ml mt">@($"{Model.FirstOrDefault(m => m.Status == 5)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="workflow-item">
+                            <div class="workflow-label">Synced:</div>
+                            <div class="workflow-content">
+                                <div class="workflow-card card border-warning">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start ml">
+                                            <h5 class="card-title">
+                                            </h5>
+                                            <span class="badge bg-info"></span>
+                                        </div>
+                                        <p class="card-text text-muted small mb-0 ml mt"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .workflow-container {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .workflow-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    .workflow-label {
+        font-size: 16px;
+        width: 100px;
+        font-weight: 600;
+        color: #4361ee;
+        padding-top: 12px;
+        flex-shrink: 0;
+    }
+
+    .workflow-content {
+        flex: 1;
+        margin-left: 20px;
+    }
+
+    .workflow-card {
+        width: 100%;
+        max-width: 400px;
+        height: 90px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+        background: white;
+    }
+
+    .workflow-arrow {
+        position: relative;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        margin: 5px 0 15px 120px;
+        width: calc(100% - 120px);
+        max-width: 400px;
+    }
+
+    .arrow-line {
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(to bottom, #06d6a0, #4361ee);
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .arrow-head {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 12px solid #4361ee;
+    }
+
+    /* Hiệu ứng nhấp nháy kiểu 3 - mờ dần */
+    @@keyframes blink-3 {
+        0% {
+            opacity: 0.2;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0.2;
+        }
+    }
+
+    .workflow-arrow.blinking .arrow-line,
+    .workflow-arrow.blinking .arrow-head {
+        animation: blink-3 2s infinite;
+    }
+
+    .card-title {
+        color: #2b2d42;
+        font-weight: 600;
+    }
+
+    .badge {
+        font-size: 1rem;
+        padding: 0.5em 1.5em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ml {
+        margin-left: 10px;
+    }
+
+    .mt {
+        margin-top: 8px;
+    }
+
+    .mb {
+        margin-bottom: 50px;
+    }
+
+    .btn-back {
+        background-color: #4361ee;
+        color: white;
+        border: none;
+        padding: 8px 30px;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-back:hover {
+            opacity: 0.9;
+            color: white;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy danh sách các status hiện có từ biến được tạo trong Razor
+        var currentStatuses = @Html.Raw(statusesJson);
+        var hasRejectStatus = @hasRejectStatus.ToString().ToLower();
+
+        // Nếu không có status REJECT (6), áp dụng hiệu ứng nhấp nháy
+        if (!hasRejectStatus) {
+            // Lấy tất cả các mũi tên
+            var arrows = document.querySelectorAll('.workflow-arrow');
+
+            arrows.forEach(function(arrow) {
+                // Lấy trạng thái tiếp theo từ thuộc tính data
+                var nextStatus = parseInt(arrow.getAttribute('data-next-status'));
+
+                // Kiểm tra nếu trạng thái tiếp theo chưa có trong danh sách
+                if (currentStatuses.indexOf(nextStatus) === -1) {
+                    arrow.classList.add('blinking');
+                }
+            });
+        }
+
+        // Xử lý sự kiện click cho nút Back
+        document.getElementById('backButton').addEventListener('click', function () {
+            window.history.back();
+        });
+    });
+</script>
