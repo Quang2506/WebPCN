@@ -131,6 +131,54 @@ html, body {
     color: #fff;
 }
 
+/* ===== TREE LINES: vẽ nét đứt nối menu con ===== */
+.sfc-tree,
+.sfc-tree ul {
+    list-style: none !important;
+    margin: 0;
+    padding-left: 18px;
+}
+
+    /* mọi item con (li) bên trong submenu */
+    .sfc-tree .sfc-submenu > li {
+        position: relative;
+    }
+
+        /* chính thẻ <a> là nơi vẽ line, để luôn nổi trên nền */
+        .sfc-tree .sfc-submenu > li > a {
+            position: relative;
+            display: block;
+        }
+
+            /* Sợi dọc */
+            .sfc-tree .sfc-submenu > li > a::before {
+                content: "";
+                position: absolute;
+                left: -14px;
+                top: -10px;
+                bottom: -8px;
+                width: 0;
+                border-left: 1px dashed rgba(148,163,184,.45);
+                pointer-events: none;
+            }
+
+        /* Li cuối: cắt sợi dọc để không “thò” xuống */
+        .sfc-tree .sfc-submenu > li:last-child > a::before {
+            bottom: auto;
+            height: 18px;
+        }
+
+        /* Sợi ngang nối từ cột dọc vào chữ */
+        .sfc-tree .sfc-submenu > li > a::after {
+            content: "";
+            position: absolute;
+            left: -14px;
+            top: 12px;
+            width: 10px;
+            border-top: 1px dashed rgba(148,163,184,.45);
+            pointer-events: none;
+        }
+
 /* ===== Main area ===== */
 .sfc-main {
     background: #e9edf3; /* nền xám nhạt */
@@ -153,7 +201,7 @@ html, body {
 /* Content như card */
 .sfc-content {
     padding: 24px;
-    min-height: calc(100vh - 56px); /* trừ chiều cao topbar */
+    min-height: calc(100vh - 56px);
 }
 
     .sfc-content > .sfc-card {
@@ -169,4 +217,125 @@ html, body {
     text-align: center;
     margin-top: 40px;
     color: #111827;
+}
+
+
+/* ===== Userbox góc phải ===== */
+.sfc-userbox {
+    float: right;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f3f4f6; /* nền xám nhạt */
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    transition: background 0.2s, color 0.2s;
+    cursor: default;
+}
+
+    .sfc-userbox:hover {
+        background: #e0f2fe; /* xanh nhạt */
+        color: #0369a1;
+        border-color: #bae6fd;
+    }
+
+.sfc-userbox__icon {
+    font-size: 15px;
+    color: #3b82f6; /* xanh dương */
+}
+
+.sfc-userbox__text {
+    white-space: nowrap;
+}
+/* ===== User box (avatar + text) ===== */
+.sfc-userbox {
+    float: right;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    background: #f8fafc; /* nền sáng */
+    border: 1px solid #e5e7eb;
+    border-radius: 9999px; /* chip tròn */
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    transition: all .2s ease;
+    user-select: none;
+}
+
+    .sfc-userbox:hover {
+        background: #ecfeff; /* xanh nhạt */
+        border-color: #bae6fd;
+        box-shadow: 0 6px 16px rgba(2,132,199,.12);
+    }
+
+/* Ảnh avatar tròn */
+.sfc-userbox__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(2,132,199,.25);
+}
+
+/* Fallback initials khi không có ảnh */
+.sfc-userbox__initials {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #0c4a6e;
+    background: linear-gradient(135deg,#e0f2fe,#bae6fd);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(2,132,199,.25);
+}
+
+/* Phần chữ */
+.sfc-userbox__text {
+    line-height: 1.1;
+    display: flex;
+    flex-direction: column;
+    margin-right: 2px;
+}
+
+.sfc-userbox__hello {
+    font-size: 11px;
+    color: #64748b; /* xám nhạt */
+    letter-spacing: .02em;
+}
+
+.sfc-userbox__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a; /* xám đậm */
+    max-width: 180px; /* tránh tràn dài */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Tối ưu trên màn nhỏ: gom lại 1 dòng */
+@media (max-width: 992px) {
+    .sfc-userbox__text {
+        flex-direction: row;
+        gap: 6px;
+    }
+
+    .sfc-userbox__hello {
+        font-size: 12px;
+    }
+
+    .sfc-userbox__name {
+        font-size: 12px;
+        max-width: 120px;
+    }
 }

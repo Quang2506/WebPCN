@@ -2,7 +2,7 @@
 @using System.Linq
 
 @{
-    // lấy id đang chọn từ Session (nếu có)
+    // Lấy node đang chọn (để mở đúng nhánh, highlight item)
     int? currentPid = Session["MenuParentId"] as int?;
     int? currentCid = Session["MenuChildId"] as int?;
 }
@@ -15,6 +15,7 @@
     if (hasChildren)
     {
         var isOpen = (currentPid.HasValue && currentPid.Value == m.MenuID);
+
         <li class="sfc-parent@(isOpen ? " open" : "")">
             <a href="#@cid"
                class="sfc-parent__link"
@@ -27,7 +28,8 @@
                 <span class="caret sfc-caret"></span>
             </a>
 
-            <ul id="@cid" class="collapse sfc-submenu@(isOpen ? " in" : "")">
+            <!-- LƯU Ý: thêm class sfc-tree ở mọi UL con -->
+            <ul id="@cid" class="collapse sfc-submenu sfc-tree@(isOpen ? " in" : "")">
                 @foreach (var c in m.Children.OrderBy(x => x.Sort))
                 {
                     if (c.Children != null && c.Children.Count > 0)
@@ -36,9 +38,9 @@
                     }
                     else
                     {
-
                         var url = Url.Action("Index", "Page", new { p = m.MenuText, c = c.MenuText });
                         var isActive = (currentCid.HasValue && currentCid.Value == c.MenuID);
+
                         <li class="sfc-leaf@(isActive ? " active" : "")">
                             <a href="@url" title="@c.MenuText">
                                 <span class="sfc-menu__text">@c.MenuText</span>
@@ -51,9 +53,10 @@
     }
     else
     {
-        // lá cấp 1
+        // Lá cấp 1 (ít dùng, nhưng để cho đầy đủ)
         var url = Url.Action("Index", "Page", new { p = "", c = m.MenuText });
         var isActive = (currentCid.HasValue && currentCid.Value == m.MenuID);
+
         <li class="sfc-leaf@(isActive ? " active" : "")">
             <a href="@url" title="@m.MenuText">
                 <span class="sfc-menu__text">@m.MenuText</span>
@@ -64,7 +67,8 @@
 
 @if (Model != null && Model.Any())
 {
-    <ul class="nav nav-pills nav-stacked sfc-menu">
+    <!-- UL gốc cũng cần sfc-tree -->
+    <ul class="nav nav-pills nav-stacked sfc-menu sfc-tree">
         @foreach (var m in Model.OrderBy(x => x.Sort))
         {
             @RenderNode(m, currentPid, currentCid)

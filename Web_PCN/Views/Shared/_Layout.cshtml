@@ -34,7 +34,13 @@
                 <div class="sfc-topbar clearfix">
                     <span class="sfc-topbar-title">@title</span>
                     <div class="pull-right">
-                        <span class="text-muted">Hi @userName</span>
+                        <div class="sfc-userbox">
+                            <span class="glyphicon glyphicon-user sfc-userbox__icon"></span>
+                            <span class="sfc-userbox__text"> @Session["UserName"]</span>
+                        </div>
+
+
+
                     </div>
                 </div>
 
