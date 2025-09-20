@@ -16,5 +16,8 @@ namespace Services
 
         public ChangeRequests RequestDetail(string requestid, string dep_c)
             => _repo.ViewDetailRequest(requestid, dep_c);
+
+        public String ProcessAction(string requestid, string dep_c, string action, string user)
+          => _repo.ProcessAction(requestid, dep_c, action, user);
     }
 }

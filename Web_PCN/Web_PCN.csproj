@@ -150,6 +150,7 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\changerequest.css" />
+    <Content Include="Content\changerequest.detail.css" />
     <Content Include="Content\images\quanta_bg.jpg" />
     <Content Include="Content\Site_login.css" />
     <Content Include="favicon.ico" />

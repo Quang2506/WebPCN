@@ -8,8 +8,7 @@ namespace Core.Dtos
 {
     public class ChangeRequests
     {
-
-        public string ChangeRequestID { get; set; }
+        public string requestid { get; set; }
         public string category_nm { get; set; }
         public string ChangeTitle { get; set; }
         public string Model { get; set; }
@@ -17,6 +16,7 @@ namespace Core.Dtos
         public string Request_detail { get; set; }
         public string version { get; set; }
         public string Status { get; set; }
+        public string dep_c { get; set; }
         public string group_dept { get; set; }
         public string Routing { get; set; }
         public string Reason { get; set; }

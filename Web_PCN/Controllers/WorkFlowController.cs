@@ -21,14 +21,14 @@ namespace Web_PCN.Controllers
         }
 
         [HttpGet]
-        public ActionResult Status(string changeRequestID)
+        public ActionResult Status(string changeRequestID, string dep_c)
         {
             if (Session["UserName"] == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            string dep_c = (Session["Dept"] as string) ?? "";
+            //string dep_c = (Session["Dept"] as string) ?? "";
 
             var statusHistory = _WorkFlow.GetJobStatusHistory(changeRequestID, dep_c);
             return View("JobStatus", statusHistory);

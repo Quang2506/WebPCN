@@ -29,5 +29,24 @@ namespace Web_PCN.Controllers
             return PartialView("ChangeRequestDetail", ChangeRequestdetail);
             //return View("ChangeRequestDetail");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("ProcessAction")]
+        public ActionResult ProcessAction(string requestId, string dep_c, string actionCode, string user)
+        {
+            var result = _RequestService.ProcessAction(requestId, dep_c, actionCode, user); // SP lọc theo user
+            if (string.Equals(result, "OK", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Success"] = "Thực hiện thành công.";
+            }
+            else
+            {
+                TempData["Error"] = string.IsNullOrWhiteSpace(result) ? "Có lỗi xảy ra." : result;
+            }
+
+            // PRG: chuyển hướng để tránh double-submit và refresh giao diện
+            return RedirectToAction("ChangeRequestDetail", new { RequestID = requestId, dep_c = dep_c });
+        }
     }
 }
