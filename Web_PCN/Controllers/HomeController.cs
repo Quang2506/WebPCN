@@ -5,34 +5,39 @@ namespace Web_PCN.Controllers
 {
     public class HomeController : Controller
     {
-        private const string DefaultTestUser = "V5030587";   // user cố định để test
+      
         private readonly MenuService _menuService = new MenuService();
 
-        
-        private string GetCurrentUser()
+
+        private string CurrentUser
         {
-            var u = Session["UserName"] as string;
-            if (string.IsNullOrWhiteSpace(u))
+            get
             {
-                u = DefaultTestUser;
-                Session["UserName"] = u; 
+                var u = (User?.Identity?.IsAuthenticated == true) ? User.Identity.Name : null;
+                if (!string.IsNullOrWhiteSpace(u))
+                {
+                    // đồng bộ lại Session nếu cần
+                    Session["UserName"] = u;
+                    return u;
+                }
+
+                u = Session["UserName"] as string;
+                return string.IsNullOrWhiteSpace(u) ? "Guest" : u;
             }
-            return u;
         }
 
         public ActionResult Index()
         {
             ViewBag.Title = "PNC Home";
             
-            var user = GetCurrentUser(); 
+          
             return View();
         }
 
         [ChildActionOnly]
         public PartialViewResult LeftMenu()
         {
-            var user = GetCurrentUser(); // luôn có giá trị (UserA khi chưa login)
-            var tree = _menuService.GetMenuTree(user); // SP sẽ lọc theo user
+            var tree = _menuService.GetMenuTree(CurrentUser); 
             return PartialView("_LeftMenu", tree);
         }
     }

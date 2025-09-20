@@ -8,7 +8,7 @@ namespace Web_PCN
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-
+           
             // Alias: /Login hoặc /Login/Logout -> AccountController
             routes.MapRoute(
                 name: "LoginAlias",
@@ -21,6 +21,8 @@ namespace Web_PCN
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Account", action = "Login", id = UrlParameter.Optional }
             );
+
+           // routes.MapMvcAttributeRoutes(); //Vic20250919
         }
     }
 }

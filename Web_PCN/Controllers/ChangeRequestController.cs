@@ -1,32 +1,33 @@
-﻿using System.Web.Mvc;
+﻿using Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
 
 namespace Web_PCN.Controllers
 {
+    [RoutePrefix("ChangeRequest")]
     public class ChangeRequestController : Controller
     {
-        // GET: /ChangeRequest/ChangeRequestCreate
-        [HttpGet]
+        private readonly ChangeRequestService _RequestService = new ChangeRequestService();
+        // GET: ChangeRequest
         public ActionResult ChangeRequestCreate()
         {
-            // Nếu view trùng tên action và nằm đúng thư mục Views/ChangeRequest/, chỉ cần return View();
-            return View(); // sẽ tìm Views/ChangeRequest/ChangeRequestCreate.cshtml
+            return View("ChangeRequestCreate");
         }
 
-        // POST: /ChangeRequest/Create  (form trong view đang post tới action này)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(FormCollection form) // hoặc ViewModel của bạn
-        {
-            // TODO: xử lý lưu
-            // Sau khi lưu xong chuyển trang:
-            return RedirectToAction("Index", "Home");
-        }
 
-        // (tuỳ chọn) GET: /ChangeRequest/ChangeRequestDetail
         [HttpGet]
-        public ActionResult ChangeRequestDetail()
+        [Route("{requestid}/{dep_c}", Name = "RequestDetails")]
+        
+
+        public ActionResult ChangeRequestDetail(string  RequestID, string dep_c)
         {
-            return View(); // Views/ChangeRequest/ChangeRequestDetail.cshtml
+
+            var ChangeRequestdetail = _RequestService.RequestDetail(RequestID, dep_c); // SP sẽ lọc theo user
+            return PartialView("ChangeRequestDetail", ChangeRequestdetail);
+            //return View("ChangeRequestDetail");
         }
     }
 }

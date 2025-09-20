@@ -329,7 +329,7 @@
     </style>
 </head>
 
-<h2>ChangeRequestDetail</h2>
+
 
 <body>
     <div class="page">
@@ -338,13 +338,14 @@
         <div class="breadcrumb">
             <a href="@Url.Action("Index","Home")">Home</a> / <a href="#">Change Request</a> / <span>New</span>
         </div>
-        <div class="page-header">
-            <div class="page-title">Change Request / New</div>
-            <div class="header-actions">
-                <button type="button" class="btn btn-outline" onclick="history.back()">Quay lại</button>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('crForm').requestSubmit()">Lưu</button>
-            </div>
-        </div>
+        <h2>ChangeRequestDetail</h2>
+        @*<div class="page-header">
+                <div class="page-title">Change Request / New</div>
+                <div class="header-actions">
+                    <button type="button" class="btn btn-outline" onclick="history.back()">Quay lại</button>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('crForm').requestSubmit()">Lưu</button>
+                </div>
+            </div>*@
 
         <!-- Toolbar -->
         @*<div class="toolbar">
@@ -372,6 +373,13 @@
         <form id="crForm" method="post" action="@Url.Action("Create","ChangeRequest")" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
 
+            <!-- Footer Actions -->
+            <div class="footer-actions">
+                <button class="btn btn-outline" type="button" onclick="history.back()">Hủy</button>
+                <button class="btn btn-primary" type="submit">Lưu</button>
+                <button class="btn btn-success" type="button" onclick="submitForApproval()">Gửi duyệt</button>
+            </div>
+
             <div class="content-grid">
                 <!-- Left: Main form -->
                 <div>
@@ -397,27 +405,27 @@
                             <div class="form-group" style="grid-column: 1 / -1;">
                                 <label for="Title">Change Title</label>
                                 @Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control" })
-                               @* <input type="text" id="Title" name="Title" placeholder="Nhập tiêu đề..." />*@
+                                @* <input type="text" id="Title" name="Title" placeholder="Nhập tiêu đề..." />*@
                             </div>
 
                             <div class="form-group">
                                 <label for="Category">Model</label>
+                                @Html.TextBoxFor(m => m.Model, new { @class = "form-control" })
 
-                                @Html.DropDownListFor(m => m.Model, (SelectList)ViewBag.ModelList, "-- Select --", new { @class = "form-control" })
 
 
                                 @*<select id="Category" name="Category">
-            <option value="">— Select —</option>
-            <option value="bug">Sửa lỗi</option>
-            <option value="feature">Tính năng mới</option>
-            <option value="improve">Cải tiến</option>
-        </select>*@
+                                        <option value="">— Select —</option>
+                                        <option value="bug">Sửa lỗi</option>
+                                        <option value="feature">Tính năng mới</option>
+                                        <option value="improve">Cải tiến</option>
+                                    </select>*@
                             </div>
 
                             <div class="form-group">
                                 <label for="Department">Department group</label>
                                 <p class="form-control-static">@Model.group_dept</p>
-       
+
                             </div>
 
                             <div class="form-group">
@@ -456,29 +464,29 @@
 
                     <!-- Items Table -->
                     <!--<div class="card">
-                        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-                            <span>Danh sách hạng mục</span>
-                            <div style="display:flex;gap:8px;">
-                                <button class="btn btn-outline" type="button" onclick="addRow()">+ Thêm dòng</button>
-                                <button class="btn btn-link" type="button" onclick="clearAllRows()">Xoá tất cả</button>
-                            </div>
+                    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+                        <span>Danh sách hạng mục</span>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-outline" type="button" onclick="addRow()">+ Thêm dòng</button>
+                            <button class="btn btn-link" type="button" onclick="clearAllRows()">Xoá tất cả</button>
                         </div>
-                        <div class="table-wrap">
-                            <table id="itemsTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width:64px;">#</th>
-                                        <th style="width:140px;">Mã</th>
-                                        <th>Hạng mục</th>
-                                        <th style="width:120px;">Số lượng</th>
-                                        <th style="width:120px;">Đơn vị</th>
-                                        <th style="width:140px;">Đơn giá</th>
-                                        <th style="width:140px;">Thành tiền</th>
-                                        <th style="width:200px;">Ghi chú</th>
-                                        <th style="width:110px;">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="itemBody">-->
+                    </div>
+                    <div class="table-wrap">
+                        <table id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:64px;">#</th>
+                                    <th style="width:140px;">Mã</th>
+                                    <th>Hạng mục</th>
+                                    <th style="width:120px;">Số lượng</th>
+                                    <th style="width:120px;">Đơn vị</th>
+                                    <th style="width:140px;">Đơn giá</th>
+                                    <th style="width:140px;">Thành tiền</th>
+                                    <th style="width:200px;">Ghi chú</th>
+                                    <th style="width:110px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemBody">-->
                     <!-- Dòng mẫu khởi tạo -->
                     <!--<tr>
                                         <td class="line-no">1</td>
@@ -506,12 +514,7 @@
                         </div>
                     </div>
 
-                    <!-- Footer Actions -->
-                    <div class="footer-actions">
-                        <button class="btn btn-outline" type="button" onclick="history.back()">Hủy</button>
-                        <button class="btn btn-primary" type="submit">Lưu</button>
-                        <button class="btn btn-success" type="button" onclick="submitForApproval()">Gửi duyệt</button>
-                    </div>
+
                 </div>
 
                 <!-- Right: Summary -->
