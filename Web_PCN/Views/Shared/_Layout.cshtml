@@ -67,20 +67,24 @@
 
 
             <!-- MAIN -->
-            <main class="@mainCols sfc-main">
-                <!-- Topbar -->
-                <div class="sfc-topbar clearfix">
-                    <span class="sfc-topbar-title">@title</span>
-                    <div class="pull-right">
-                        <span class="text-muted">Hello, @userName</span>
+        <main class="@mainCols sfc-main">
+            <!-- Topbar -->
+            <div class="sfc-topbar clearfix">
+                <span class="sfc-topbar-title">@title</span>
+                <div class="pull-right">
+                    <div class="sfc-userbox">
+                        <span class="glyphicon glyphicon-user sfc-userbox__icon"></span>
+                        <span class="sfc-userbox__text"> @Session["UserName"]</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Content -->
-                <div class="sfc-content">
-                    @RenderBody()
-                </div>
-            </main>
+
+            <!-- Content -->
+            <div class="sfc-content">
+                @RenderBody()
+            </div>
+        </main>
         </div>
     </div>
 

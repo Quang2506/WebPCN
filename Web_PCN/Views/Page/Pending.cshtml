@@ -9,14 +9,14 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <strong>@parent → @child</strong>
+        <strong>Pending request</strong>
         <div class="pull-right">
             <a class="btn btn-primary btn-xs"
                href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
                 Create new request
             </a>
             <a class="btn btn-default btn-xs"
-               href="@Url.Action("Query", "Page", new { p = parent, c = child ,m=1,n=1})">
+               href="@Url.Action("Query", "Page", new { p = parent, c = child })">
                 Query
             </a>
         </div>
@@ -24,37 +24,47 @@
     </div>
 
     <div class="panel-body">
-        <h4>Pending request</h4>
+
 
         @if (Model != null && Model.Any())
         {
-            <table class="table table-bordered table-hover table-condensed">
-                <thead>
-                    <tr class="info">
-                        <th style="width:160px;">Code</th>
-                        <th style="width:90px;">Version</th>
-                        <th>Change title</th>
-                        <th style="width:150px;">Department</th>
-                        <th style="width:150px;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var r in Model)
-                    {
-                        <tr>
-                            <td><a href="#">@r.Code</a></td>
-                            <td>@r.Version</td>
-                            <td class="text-danger">@r.ChangeTitle</td>
-                            <td>@r.Department</td>
-                            <td class="text-danger">@r.Status</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <div class="text-muted">No data.</div>
-        }
-    </div>
-</div>
+            <div style="max-height: 660px; overflow-y: auto">
+                <table  class="table table-bordered table-hover table-condensed">
+                    <thead>
+                       <tr class="info">
+                           <th style="width:160px;">Document code</th>
+                           <th style="width:90px;">Category</th>
+                           <th style="width:90px;">Version</th>
+                           <th>Change title</th>
+                           <th style="width:150px;">Department</th>
+                           <th style="width:150px;">Status</th>
+                           <th style="width:150px;">TransDateTime</th>
+                       </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("ChangeRequestDetail","ChangeRequest", new { requestid = r.RequestID, dep_c = r.Department })">
+                                        @r.Code
+                                    </a>
+                                </td>
+                                <td>@r.Category</td>
+                                <td>@r.Version</td>
+                                <td>@r.ChangeTitle</td>
+                                <td>@r.Department</td>
+                                <td>@r.Status</td>
+                                <td>@r.TransDateTime</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                </div>
+                }
+                else
+                {
+                <div class="text-muted">No data.</div>
+                }
+            </div>
+        </div>

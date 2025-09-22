@@ -16,58 +16,70 @@ namespace Web_PCN.Controllers
             var parent = pid.HasValue ? _menuService.GetById(pid.Value)
                                       : _menuService.GetParentByName(p);
             var child = cid.HasValue ? _menuService.GetById(cid.Value)
-                                     : _menuService.GetChildByNames(p, c);
+                                      : _menuService.GetChildByNames(p, c);
             Session["MenuParentId"] = parent?.MenuID;
             Session["MenuParentName"] = parent?.MenuText ?? "";
             Session["MenuChildId"] = child?.MenuID;
             Session["MenuChildName"] = child?.MenuText ?? "";
             Session["ScreenName"] = child?.MenuText ?? "";
-            var user = (Session["UserName"] as string) ?? "V5030587";
+            var user = (Session["UserName"] as string) ?? "V4050021";
             var data = _page.GetChangeRequestsByMenu(
                 parent?.MenuText, child?.MenuText, user,
                 parent?.MenuID, child?.MenuID
             );
             ViewBag.Title = $"{parent?.MenuText} → {child?.MenuText}";
-            return View("Pending", data); // Views/Page/Pending.cshtml
+            return View("Pending", data);
         }
-        // QUERY (GET)
+        // QUERY (GET): mở form + nạp dropdown
         [HttpGet]
         public ActionResult Query(string p, string c, int? pid, int? cid)
         {
             var parent = pid.HasValue ? _menuService.GetById(pid.Value)
                                       : _menuService.GetParentByName(p);
             var child = cid.HasValue ? _menuService.GetById(cid.Value)
-                                     : _menuService.GetChildByNames(p, c);
+                                      : _menuService.GetChildByNames(p, c);
             Session["MenuParentId"] = parent?.MenuID;
             Session["MenuParentName"] = parent?.MenuText ?? "";
             Session["MenuChildId"] = child?.MenuID;
             Session["MenuChildName"] = child?.MenuText ?? "";
             Session["ScreenName"] = child?.MenuText ?? "";
-            var user = (Session["UserName"] as string) ?? "V5030587";
+            var user = (Session["UserName"] as string) ?? "V4050021";
             var vm = new QueryViewModel
             {
                 ParentName = parent?.MenuText,
                 ChildName = child?.MenuText,
                 ParentId = parent?.MenuID,
                 ChildId = child?.MenuID,
+                // Cho GET lần đầu: hiển thị giống Pending
                 Results = _page.GetChangeRequestsByMenu(
                     parent?.MenuText, child?.MenuText, user,
-                    parent?.MenuID, child?.MenuID)
+                    parent?.MenuID, child?.MenuID
+                )
             };
+            // dropdown theo SP lookup
+            vm.CategoryList = _page.GetOptionList("category", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
+            vm.StatusList = _page.GetOptionList("status", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
+            vm.DocumentCodeList = _page.GetOptionList("doc", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
+            vm.ChangeTitleList = _page.GetOptionList("title", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
             ViewBag.Title = $"{vm.ParentName} → {vm.ChildName} (Query)";
             return View("Query", vm);
         }
-        // QUERY (POST)
+        // QUERY (POST): submit bộ lọc
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Query(QueryViewModel vm)
         {
-            var user = (Session["UserName"] as string) ?? "V5030587";
+            var user = (Session["UserName"] as string) ?? "V4050021";
             vm.Results = _page.QueryChangeRequests(
                 vm.ParentName, vm.ChildName, user,
                 vm.Category, vm.DocumentCode, vm.ChangeTitle, vm.Status,
                 vm.ParentId, vm.ChildId
             );
+            // nạp lại dropdowns sau POST
+            vm.CategoryList = _page.GetOptionList("category", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
+            vm.StatusList = _page.GetOptionList("status", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
+            vm.DocumentCodeList = _page.GetOptionList("doc", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
+            vm.ChangeTitleList = _page.GetOptionList("title", vm.ParentName, vm.ChildName, user, vm.ParentId, vm.ChildId);
             ViewBag.Title = $"{vm.ParentName} → {vm.ChildName}";
             return View("Query", vm);
         }
@@ -75,7 +87,7 @@ namespace Web_PCN.Controllers
         [HttpPost]
         public FileResult Download(QueryViewModel vm)
         {
-            var user = (Session["UserName"] as string) ?? "V5030587";
+            var user = (Session["UserName"] as string) ?? "V4050021";
             var rows = _page.QueryChangeRequests(
                 vm.ParentName, vm.ChildName, user,
                 vm.Category, vm.DocumentCode, vm.ChangeTitle, vm.Status,

@@ -1,80 +1,156 @@
 ﻿@model Core.Dtos.QueryViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var parent = Model.ParentName;
-    var child = Model.ChildName;
 }
+<style>
+    /* --- form: 2 cột --- */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        gap: 16px 20px;
+        margin-bottom: 16px
+    }
 
+    .form-group label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #374151;
+        margin-bottom: 6px
+    }
+
+    .form-group select {
+        height: 38px;
+        padding: 6px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        background: #f9fafb;
+        color: #111827;
+        font-size: 13px;
+        transition: .2s
+    }
+
+        .form-group select:focus {
+            outline: none;
+            background: #fff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,.2)
+        }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px
+    }
+    /* --- empty state khi không có data --- */
+    .empty {
+        border: 1px dashed #cfd6e5;
+        border-radius: 10px;
+        background: #f8fafc;
+        padding: 28px;
+        text-align: center;
+        color: #64748b
+    }
+
+        .empty .emoji {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #3949ab
+        }
+
+        .empty h5 {
+            margin: 6px 0 4px;
+            font-weight: 700;
+            color: #334155
+        }
+
+        .empty p {
+            margin: 0
+        }
+</style>
 <div class="panel panel-default">
     <div class="panel-heading"><strong>View Change Request</strong></div>
     <div class="panel-body">
-        @using (Html.BeginForm("Query", "Page", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        @using (Html.BeginForm("Query", "Page", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
+            @* giữ ngữ cảnh menu *@
             @Html.HiddenFor(m => m.ParentName)
             @Html.HiddenFor(m => m.ChildName)
-
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Category:</label>
-                <div class="col-sm-4">
-                    @Html.TextBoxFor(m => m.Category, new { @class = "form-control" })
+            @Html.HiddenFor(m => m.ParentId)
+            @Html.HiddenFor(m => m.ChildId)
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Category</label>
+                    @Html.DropDownListFor(m => m.Category,
+                             Model.CategoryList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
+                             "-- All categories --",
+                             new { @class = "form-control" })
                 </div>
-
-                <label class="col-sm-2 control-label">Status</label>
-                <div class="col-sm-4">
-                    @Html.TextBoxFor(m => m.Status, new { @class = "form-control" })
+                <div class="form-group">
+                    <label>Status</label>
+                    @Html.DropDownListFor(m => m.Status,
+                             Model.StatusList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
+                             "-- All status --",
+                             new { @class = "form-control" })
+                </div>
+                <div class="form-group">
+                    <label>Document code</label>
+                    @Html.DropDownListFor(m => m.DocumentCode,
+                             Model.DocumentCodeList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
+                             "-- All document codes --",
+                             new { @class = "form-control" })
+                </div>
+                <div class="form-group">
+                    <label>Changes title</label>
+                    @Html.DropDownListFor(m => m.ChangeTitle,
+                             Model.ChangeTitleList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
+                             "-- All titles --",
+                             new { @class = "form-control" })
                 </div>
             </div>
-
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Document code:</label>
-                <div class="col-sm-4">
-                    @Html.TextBoxFor(m => m.DocumentCode, new { @class = "form-control" })
-                </div>
-
-                <label class="col-sm-2 control-label">Changes title:</label>
-                <div class="col-sm-4">
-                    @Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-sm-6">
-                    <button type="submit" class="btn btn-primary">Query</button>
-                </div>
-                <div class="col-sm-6 text-right">
-                    <button formaction="@Url.Action("Download","Page")" formmethod="post"
-                            class="btn btn-default">
-                        Download
-                    </button>
-                </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Query</button>
+                <button formaction="@Url.Action("Download","Page")" formmethod="post" class="btn btn-default">Download</button>
             </div>
         }
-
         <hr />
-
         @if (Model.Results != null && Model.Results.Any())
         {
             <table class="table table-bordered table-hover table-condensed">
                 <thead>
                     <tr class="info">
-                        <th style="width:160px;">Code</th>
+                        <th style="width:160px;">Document code</th>
+                        <th style="width:90px;">Category</th>
                         <th style="width:90px;">Version</th>
                         <th>Change title</th>
                         <th style="width:150px;">Department</th>
                         <th style="width:150px;">Status</th>
+                        <th style="width:150px;">TransDateTime</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var r in Model.Results)
                     {
                         <tr>
-
-                            <td><a href="@Url.Action("ChangeRequestDetail","ChangeRequest",new { requestid = "3BA3A750-EFFD-4F88-8BEC-731BCB843351", dep_c = "vi_fatp_qms" })">@r.Code</a></td>
+                            <td>
+                                <a href="@Url.Action("ChangeRequestDetail","ChangeRequest",
+                                        new { requestid = r.RequestID, dep_c = r.Department })">
+                                    @r.Code
+                                </a>
+                            </td>
+                            <td>@r.Category</td>
                             <td>@r.Version</td>
-                            <td class="text-danger">@r.ChangeTitle</td>
+                            <td>@r.ChangeTitle</td>
                             <td>@r.Department</td>
-                            <td class="text-danger">@r.Status</td>
+                            <td>@r.Status</td>
+                            <td>@r.TransDateTime</td>
                         </tr>
                     }
                 </tbody>
@@ -82,9 +158,11 @@
         }
         else
         {
-            <div class="text-muted">No data.</div>
+            <div class="empty">
+                <div class="emoji">🗂️</div>
+                <h5>No data found</h5>
+                <p>Hãy thay đổi bộ lọc bên trên rồi nhấn <strong>Query</strong>.</p>
+            </div>
         }
     </div>
 </div>
-
-

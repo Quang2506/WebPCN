@@ -9,5 +9,13 @@
         public string Status { get; set; }
         public string Category { get; set; }
         public string DocumentCode { get; set; }
+        public string DepGroup { get; set; }   // map dep_group
+        public string RequestID { get; set; }  // map RequestID
+
+        public string TransDateTime { get; set; }
+        public string StatusCode { get; set; }
+
+
+
     }
 }
