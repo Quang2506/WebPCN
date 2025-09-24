@@ -1,0 +1,135 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout_Login.cshtml";
+    ViewBag.Title = "Welcome";
+    var next = (string)(ViewBag.NextUrl ?? Url.Action("Index", "Home"));
+    var user = (string)(ViewBag.UserName ?? "User");
+}
+
+@section Styles{
+    <style>
+  /* ====== Splash container ====== */
+  .splash-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(900px 450px at -10% -10%, rgba(59,130,246,.30) 0, transparent 60%),
+      radial-gradient(900px 450px at 120% 120%, rgba(34,197,94,.28) 0, transparent 60%),
+      linear-gradient(135deg,#0f1b2d,#0f2036);
+  }
+
+  .splash-card{
+    width: 440px; max-width: 92vw;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    padding: 36px 28px;
+    color: #eaf0f6;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ---- Glowing ring ---- */
+  .ring{
+    width: 120px; height:120px; margin: 10px auto 18px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, #1e90ff, #22d3ee 60%, transparent 70%);
+    filter: blur(10px);
+    opacity: .35; transform: scale(.8);
+    animation: ringPulse 2.6s ease-in-out infinite; /* chậm hơn */
+  }
+  @@keyframes ringPulse{
+    0%,100%{ opacity:.25; transform: scale(.8);}
+    50%{    opacity:.45; transform: scale(1);}
+  }
+
+  /* ---- Check SVG drawing ---- */
+  .check{
+    width: 96px; height: 96px; margin: -92px auto 8px;  /* đặt đè lên ring */
+    display:block;
+  }
+  .check circle{
+    fill:#0f2036; stroke:#3b82f6; stroke-width:8; filter: drop-shadow(0 4px 14px rgba(59,130,246,.55));
+    stroke-dasharray: 472; stroke-dashoffset: 472;
+    animation: draw 1000ms ease forwards 300ms; /* chậm hơn & trễ hơn */
+  }
+  .check path{
+    stroke:#34d399; stroke-width:10; fill:none; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray: 120; stroke-dashoffset: 120;
+    animation: draw 900ms cubic-bezier(.2,.9,.2,1) forwards 1000ms; /* chậm hơn */
+    filter: drop-shadow(0 6px 14px rgba(52,211,153,.55));
+  }
+  @@keyframes draw{
+    to{ stroke-dashoffset: 0; }
+  }
+
+  .title{ font-size: 28px; font-weight: 700; letter-spacing:.3px; margin-top: 6px; }
+  .sub{ opacity:.85; }
+
+  /* ---- Mini progress bar ---- */
+  .progress-wrap{ height: 6px; background: rgba(255,255,255,.18); border-radius: 999px; margin-top: 22px; overflow:hidden;}
+  .bar{ height:100%; width:0%; background: linear-gradient(90deg,#22d3ee,#3b82f6); animation: load 2.8s ease-in forwards;} /* lâu hơn */
+  @@keyframes load{ from{width:0%} to{width:100%} }
+
+  /* ---- Confetti ---- */
+  .confetti{ position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; overflow:visible;}
+  .confetti i{
+    position:absolute; width:8px; height:14px; opacity:0; transform: translateY(-20px) rotate(0deg);
+    animation: fall var(--dur, 2000ms) cubic-bezier(.2,.7,.2,1) forwards; /* default lâu hơn */
+  }
+  @@keyframes fall{
+    0%{ opacity:0; transform: translateY(-20px) rotate(0deg);}
+    10%{opacity:1;}
+    100%{ opacity:0; transform: translateY(520px) rotate(540deg); } /* rơi xa hơn */
+  }
+    </style>
+}
+
+<section class="splash-wrap">
+    <div class="splash-card">
+        <div class="ring"></div>
+
+        <!-- Check SVG -->
+        <svg class="check" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <circle cx="60" cy="60" r="44"></circle>
+            <path d="M40 62 L56 76 L82 46"></path>
+        </svg>
+
+        <div class="title">Welcome, @user!</div>
+        <div class="sub">Login successful. Redirecting to your dashboard…</div>
+
+        <div class="progress-wrap"><div class="bar"></div></div>
+
+        <div class="confetti" id="confetti"></div>
+    </div>
+</section>
+
+@section scripts{
+    <script>
+  // ---- Confetti generator (lightweight, no lib)
+  (function(){
+    const area = document.getElementById('confetti');
+    const colors = ['#22d3ee','#3b82f6','#34d399','#f59e0b','#ef4444','#a78bfa'];
+    const pieces = 56; // hơi nhiều hơn một chút
+    for(let i=0;i<pieces;i++){
+      const p = document.createElement('i');
+      const left = Math.random()*100;               // %
+      const delay = Math.random()*500;              // ms (trễ hơn)
+      const dur = 1400 + Math.random()*1400;        // 1.4s - 2.8s (lâu hơn)
+      p.style.left = left + '%';
+      p.style.top = (-Math.random()*80) + 'px';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = delay + 'ms';
+      p.style.setProperty('--dur', dur + 'ms');
+      p.style.borderRadius = (Math.random()>.5?2:999)+'px';
+      area.appendChild(p);
+    }
+  })();
+
+  // ---- Redirect after longer delay
+  setTimeout(function(){
+    window.location.href = '@next';
+  }, 3200); // 3.2 giây
+    </script>
+}

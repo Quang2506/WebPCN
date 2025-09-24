@@ -1,316 +1,310 @@
-﻿@model List<Core.Dtos.WorkFlow>
+﻿@model IEnumerable<Core.Dtos.WorkFlow>
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var statuses = Model.Select(m => m.Status).ToList();
-    // Tạo chuỗi JSON thủ công từ danh sách statuses
-    var statusesJson = "[" + string.Join(",", statuses) + "]";
-    var hasRejectStatus = statuses.Contains(6);
+    var statuses = Model != null ? Model.Select(m => m.Status).ToList() : new List<int>();
+
+    var workflowSteps = new List<Tuple<int, string>>()
+{
+        Tuple.Create(2, "Created"),
+        Tuple.Create(3, "Approved"),
+        Tuple.Create(5, "Synced"),
+        Tuple.Create(6, "Rejected")
+    };
 }
 
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+    <div class="row">
+        <div class="col-xs-12 col-md-10 col-md-offset-1">
             <div class="mb-4">
-                <button id="backButton" class="btn btn-back">
-                    <i class="fas fa-arrow-left"></i> Back
+                <button id="backButton" class="btn btn-default">
+                    <i class="fa fa-arrow-left"></i> Back
                 </button>
             </div>
-            <h1 class="text-center mb-4 mb">Work Flow</h1>
-            <div class="workflow-container">
-
-                <!-- CREATE -->
-                <div class="workflow-item">
-                    <div class="workflow-label">Created:</div>
-                    <div class="workflow-content">
-                        <div class="workflow-card card border-success">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start ml">
-                                    <h5 class="card-title">
-                                        @($"{Model.FirstOrDefault(m => m.Status == 2)?.Confirm_per}")
-                                    </h5>
-                                    <span class="badge bg-success">@($"{Model.FirstOrDefault(m => m.Status == 2)?.Status_nm}") </span>
-                                </div>
-                                <p class="card-text text-muted small mb-0 ml mt">
-                                    @($"{Model.FirstOrDefault(m => m.Status == 2)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="workflow-arrow" data-next-status="3">
-                    <div class="arrow-line"></div>
-                    <div class="arrow-head"></div>
-                </div>
-
-                @if (hasRejectStatus)
+            <h1 class="text-center">Work Flow</h1>
+            <div class="workflow-container-v2">
+                @if (Model != null && Model.Any())
                 {
-                    <div class="workflow-item">
-                        <div class="workflow-label">Reject:</div>
-                        <div class="workflow-content">
-                            <div class="workflow-card card border-info">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start ml">
-                                        <h5 class="card-title">
-                                            @($"{Model.FirstOrDefault(m => m.Status == 6)?.Confirm_per}")
-                                        </h5>
-                                        <span class="badge bg-info"> @($"{Model.FirstOrDefault(m => m.Status == 6)?.Status_nm}")</span>
-                                    </div>
-                                    <p class="card-text text-muted small mb-0 ml mt">@($"{Model.FirstOrDefault(m => m.Status == 6)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")</p>
+                    // Lấy dữ liệu cho từng trạng thái
+                    var createdStep = Model.FirstOrDefault(m => m.Status == 2);
+                    var approvedStep = Model.FirstOrDefault(m => m.Status == 3);
+                    var syncedStep = Model.FirstOrDefault(m => m.Status == 5);
+                    var rejectedStep = Model.FirstOrDefault(m => m.Status == 6);
+
+                    var hasCreated = createdStep != null;
+                    var hasApproved = approvedStep != null;
+                    var hasSynced = syncedStep != null;
+                    var hasRejected = rejectedStep != null;
+
+                    // 1. Hiển thị thẻ 'Created' (luôn luôn có nếu có dữ liệu)
+                    if (hasCreated)
+                    {
+                        <div class="workflow-step completed">
+                            <div class="step-icon icon-completed"><i class="fa fa-check"></i></div>
+                            <div class="step-content">
+                                <span class="step-label">@workflowSteps.FirstOrDefault(s => s.Item1 == 2).Item2</span>
+                                <div class="step-info">
+                                    <strong class="step-title-highlight">@createdStep.Confirm_per</strong>
+                                    <p class="step-date">@createdStep.Confirm_dt.ToString("dd/MM/yyyy HH:mm")</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                        // 2. Hiển thị mũi tên và thẻ 'Approved'
+                        if (hasRejected) // Nếu bị Rejected ngay sau Created
+                        {
+                            <div class="workflow-arrow-v2 blinking pending">
+                                <i class="fa fa-long-arrow-down"></i>
+                            </div>
+                            <div class="workflow-step completed rejected">
+                                <div class="step-icon icon-rejected"><i class="fa fa-times"></i></div>
+                                <div class="step-content">
+                                    <span class="step-label">@workflowSteps.FirstOrDefault(s => s.Item1 == 6).Item2</span>
+                                    <div class="step-info">
+                                        <strong class="step-title-highlight">@rejectedStep.Confirm_per</strong>
+                                        <p class="step-date">@rejectedStep.Confirm_dt.ToString("dd/MM/yyyy HH:mm")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else // Chuyển sang Approved
+                        {
+                            <div class="workflow-arrow-v2 @(hasApproved ? "completed" : "blinking pending")">
+                                <i class="fa fa-long-arrow-down"></i>
+                            </div>
+                            <div class="workflow-step @(hasApproved ? "completed" : "")">
+                                <div class="step-icon @(hasApproved ? "icon-completed" : "icon-processing")">
+                                    <i class="fa @(hasApproved ? "fa-check" : "fa-sync-alt fa-spin")"></i>
+                                </div>
+                                <div class="step-content">
+                                    <span class="step-label">@workflowSteps.FirstOrDefault(s => s.Item1 == 3).Item2</span>
+                                    <div class="step-info">
+                                        @if (hasApproved)
+                                        {
+                                            <strong class="step-title-highlight">@approvedStep.Confirm_per</strong>
+                                            <p class="step-date">@approvedStep.Confirm_dt.ToString("dd/MM/yyyy HH:mm")</p>
+                                        }
+                                        else
+                                        {
+                                            <strong class="step-title-highlight">Pending...</strong>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            // 3. Hiển thị mũi tên và thẻ 'Synced' (chỉ khi Approved đã hoàn thành)
+                            if (hasApproved)
+                            {
+                                <div class="workflow-arrow-v2 @(hasSynced ? "completed" : "blinking pending")">
+                                    <i class="fa fa-long-arrow-down"></i>
+                                </div>
+                                <div class="workflow-step @(hasSynced ? "completed" : "")">
+                                    <div class="step-icon @(hasSynced ? "icon-completed" : "icon-processing")">
+                                        <i class="fa @(hasSynced ? "fa-check" : "fa-sync-alt fa-spin")"></i>
+                                    </div>
+                                    <div class="step-content">
+                                        <span class="step-label">@workflowSteps.FirstOrDefault(s => s.Item1 == 5).Item2</span>
+                                        <div class="step-info">
+                                            @if (hasSynced)
+                                            {
+                                                <strong class="step-title-highlight">@syncedStep.Confirm_per</strong>
+                                                <p class="step-date">@syncedStep.Confirm_dt.ToString("dd/MM/yyyy HH:mm")</p>
+                                            }
+                                            else
+                                            {
+                                                <strong class="step-title-highlight">Processing...</strong>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    <!-- APPROVAL -->
-                    if (statuses.Contains(3))
-                    {
-                        <div class="workflow-item">
-                            <div class="workflow-label">Approved:</div>
-                            <div class="workflow-content">
-                                <div class="workflow-card card border-warning">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start ml">
-                                            <h5 class="card-title">
-                                                @($"{Model.FirstOrDefault(m => m.Status == 3)?.Confirm_per}")
-                                            </h5>
-                                            <span class="badge bg-warning">@($"{Model.FirstOrDefault(m => m.Status == 3)?.Status_nm}")</span>
-                                        </div>
-                                        <p class="card-text text-muted small mb-0 ml mt">@($"{Model.FirstOrDefault(m => m.Status == 3)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="workflow-arrow" data-next-status="5">
-                            <div class="arrow-line"></div>
-                            <div class="arrow-head"></div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="workflow-item">
-                            <div class="workflow-label">Approved:</div>
-                            <div class="workflow-content">
-                                <div class="workflow-card card border-warning">
-                                    <div class="card-body"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="workflow-arrow" data-next-status="5">
-                            <div class="arrow-line"></div>
-                            <div class="arrow-head"></div>
-                        </div>
-                    }
-
-
-                    <!-- SYNC -->
-                    if (statuses.Contains(5))
-                    {
-                        <div class="workflow-item">
-                            <div class="workflow-label">Synced:</div>
-                            <div class="workflow-content">
-                                <div class="workflow-card card border-info">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start ml">
-                                            <h5 class="card-title">
-                                                @($"{Model.FirstOrDefault(m => m.Status == 5)?.Confirm_per}")
-                                            </h5>
-                                            <span class="badge bg-info"> @($"{Model.FirstOrDefault(m => m.Status == 5)?.Status_nm}")</span>
-                                        </div>
-                                        <p class="card-text text-muted small mb-0 ml mt">@($"{Model.FirstOrDefault(m => m.Status == 5)?.Confirm_dt.ToString("dd/MM/yyyy HH:mm")}")</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="workflow-item">
-                            <div class="workflow-label">Synced:</div>
-                            <div class="workflow-content">
-                                <div class="workflow-card card border-warning">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start ml">
-                                            <h5 class="card-title">
-                                            </h5>
-                                            <span class="badge bg-info"></span>
-                                        </div>
-                                        <p class="card-text text-muted small mb-0 ml mt"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
+                    <div class="alert alert-info text-center">No workflow history available.</div>
                 }
             </div>
         </div>
     </div>
 </div>
 
-
 <style>
-    .workflow-container {
-        position: relative;
-        padding-left: 40px;
+    /* Bổ sung các styles còn thiếu */
+    .py-5 {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
     }
 
-    .workflow-item {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 10px;
-        position: relative;
+    .mb-4 {
+        margin-bottom: 1.5rem;
     }
 
-    .workflow-label {
-        font-size: 16px;
-        width: 100px;
-        font-weight: 600;
-        color: #4361ee;
-        padding-top: 12px;
-        flex-shrink: 0;
+    .mb-5 {
+        margin-bottom: 3rem;
     }
 
-    .workflow-content {
-        flex: 1;
-        margin-left: 20px;
+    .text-center {
+        text-align: center;
     }
 
-    .workflow-card {
+    .btn-default {
+        background-color: #f8f8f8;
+        border-color: #ccc;
+    }
+
+        .btn-default:hover {
+            background-color: #e8e8e8;
+        }
+
+    /* Tổng quan container */
+    .workflow-container-v2 {
+        display: block; /* Đảm bảo nó không phải flexbox */
         width: 100%;
-        max-width: 400px;
-        height: 90px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-radius: 10px;
-        overflow: hidden;
-        position: relative;
-        z-index: 2;
-        background: white;
+        max-width: 600px;
+        margin: 0 auto;
     }
 
-    .workflow-arrow {
-        position: relative;
-        height: 40px;
+    /* Các bước của Workflow */
+    .workflow-step {
         display: flex;
+        align-items: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        width: 100%;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Icon trạng thái */
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        margin: 5px 0 15px 120px;
-        width: calc(100% - 120px);
-        max-width: 400px;
+        font-size: 24px;
+        color: white;
+        margin-right: 20px;
     }
 
-    .arrow-line {
-        width: 2px;
-        height: 100%;
-        background: linear-gradient(to bottom, #06d6a0, #4361ee);
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+    .icon-completed {
+        background-color: #06d6a0;
     }
 
-    .arrow-head {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-top: 12px solid #4361ee;
+    .icon-rejected {
+        background-color: #ef476f;
     }
 
-    /* Hiệu ứng nhấp nháy kiểu 3 - mờ dần */
-    @@keyframes blink-3 {
-        0% {
+    .icon-pending {
+        background-color: #ffc107;
+    }
+
+    /* Thêm style cho icon "Processing" */
+    .icon-processing {
+        background-color: #4CAF50; /* Màu xanh lá cây */
+    }
+
+    /* Nội dung của bước */
+    .step-content {
+        flex-grow: 1;
+    }
+
+    /* Cập nhật font cho step-label */
+    .step-label {
+        font-weight: bold;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-size: 1.2rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Class mới để làm nổi bật chữ */
+    .step-title-highlight {
+        margin-top: 5px;
+        margin-bottom: 10px;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #343a40;
+        position: relative;
+        display: block;
+    }
+
+        .step-title-highlight::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: #e9ecef;
+        }
+
+    /* Cập nhật font cho step-date */
+    .step-date {
+        font-size: 1.3rem;
+        color: #adb5bd;
+        margin-top: 15px;
+    }
+
+    /* Mũi tên giữa các bước */
+    .workflow-arrow-v2 {
+        font-size: 2.5rem;
+        margin: -10px auto 10px auto;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: block;
+        width: 100%;
+    }
+
+    /* Điều chỉnh màu sắc mũi tên */
+    .arrow-completed {
+        color: #007bff;
+    }
+
+    .arrow-rejected {
+        color: #dc3545;
+    }
+
+    .arrow-pending {
+        color: #ffc107;
+    }
+
+    /* Hiệu ứng nhấp nháy */
+    @@keyframes blink-arrow {
+        0%, 100% {
             opacity: 0.2;
         }
 
         50% {
             opacity: 1;
         }
-
-        100% {
-            opacity: 0.2;
-        }
     }
 
-    .workflow-arrow.blinking .arrow-line,
-    .workflow-arrow.blinking .arrow-head {
-        animation: blink-3 2s infinite;
+    .workflow-arrow-v2.blinking {
+        animation: blink-arrow 2s infinite;
     }
 
-    .card-title {
-        color: #2b2d42;
-        font-weight: 600;
+    /* Trạng thái đã hoàn thành hoặc bị từ chối */
+    .workflow-step.completed {
+        border-left: 5px solid #06d6a0;
+        box-shadow: 0 4px 15px rgba(6, 214, 160, 0.2);
     }
 
-    .badge {
-        font-size: 1rem;
-        padding: 0.5em 1.5em;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+    .workflow-step.rejected {
+        border-left: 5px solid #ef476f;
+        box-shadow: 0 4px 15px rgba(239, 71, 111, 0.2);
     }
-
-    .ml {
-        margin-left: 10px;
-    }
-
-    .mt {
-        margin-top: 8px;
-    }
-
-    .mb {
-        margin-bottom: 50px;
-    }
-
-    .btn-back {
-        background-color: #4361ee;
-        color: white;
-        border: none;
-        padding: 8px 30px;
-        border-radius: 5px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-        .btn-back:hover {
-            opacity: 0.9;
-            color: white;
-        }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Lấy danh sách các status hiện có từ biến được tạo trong Razor
-        var currentStatuses = @Html.Raw(statusesJson);
-        var hasRejectStatus = @hasRejectStatus.ToString().ToLower();
-
-        // Nếu không có status REJECT (6), áp dụng hiệu ứng nhấp nháy
-        if (!hasRejectStatus) {
-            // Lấy tất cả các mũi tên
-            var arrows = document.querySelectorAll('.workflow-arrow');
-
-            arrows.forEach(function(arrow) {
-                // Lấy trạng thái tiếp theo từ thuộc tính data
-                var nextStatus = parseInt(arrow.getAttribute('data-next-status'));
-
-                // Kiểm tra nếu trạng thái tiếp theo chưa có trong danh sách
-                if (currentStatuses.indexOf(nextStatus) === -1) {
-                    arrow.classList.add('blinking');
-                }
-            });
-        }
-
-        // Xử lý sự kiện click cho nút Back
+    document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('backButton').addEventListener('click', function () {
             window.history.back();
         });

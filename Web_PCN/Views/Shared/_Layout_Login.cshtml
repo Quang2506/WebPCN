@@ -1,45 +1,28 @@
-﻿@{
-    Layout = null;
-    ViewBag.Title = ViewBag.Title ?? "Đăng nhập";
-}
+﻿@*
+    Layout riêng cho trang Đăng nhập (offline)
+    - Bootstrap 5 (file local)
+    - Nhúng SVG sprite icon (offline)
+*@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>@ViewBag.Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Bootstrap 5 CSS (LOCAL): đảm bảo có ~/Content/bootstrap.min.css -->
     <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/Content/Site.css" />
+
     @RenderSection("Styles", required: false)
-
-    <style>
-        html, body {
-            height: 100%;
-            overflow-x: hidden; /* fix khoảng trắng do tràn ngang */
-        }
-
-        body {
-            margin: 0;
-        }
-
-        main#auth-root {
-            min-height: 100vh;
-            width: 100vw; /* full viewport width */
-            display: block; /* KHÔNG dùng flex để khỏi co chiều ngang */
-        }
-    </style>
-
 </head>
-<body>
-    <!-- Không bọc container để thật sự full-bleed -->
-    <main id="auth-root">
-        @RenderBody()
-    </main>
+<body class="bg-light">
+    <!-- Sprite icon nội bộ (offline) -->
+    @Html.Partial("~/Views/Shared/_IconsSprite.cshtml")
 
-    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
-    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    @RenderBody()
+
+    <!-- Bootstrap 5 JS bundle (LOCAL) -->
+    <script src="~/Scripts/bootstrap3/bootstrap.bundle.min.js"></script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

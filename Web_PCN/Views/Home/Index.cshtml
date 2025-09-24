@@ -1,6 +1,533 @@
-﻿@{
+﻿@model Core.Dtos.DashboardViewModel
+@using System
+@using System.Linq
+
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var lines = (Model?.Lines != null && Model.Lines.Any())
+        ? Model.Lines
+        : (Model?.Grid ?? Enumerable.Empty<Core.Dtos.DeptCell>())
+            .Select(x => x.Line).Distinct().OrderBy(x => x).ToList();
+
+    var cols = (Model?.Depts != null && Model.Depts.Any())
+        ? Model.Depts
+        : (Model?.Grid ?? Enumerable.Empty<Core.Dtos.DeptCell>())
+            .Select(x => x.Dept).Distinct().OrderBy(x => x).ToList();
+
+    Func<string, string, Core.Dtos.DeptCell> CellOf = (ln, dp) =>
+         (Model != null && Model.Grid != null
+             ? Model.Grid.FirstOrDefault(x =>
+                 string.Equals(x.Line, ln, StringComparison.OrdinalIgnoreCase) &&
+                 string.Equals(x.Dept, dp, StringComparison.OrdinalIgnoreCase))
+             : null
+         );
+
+    var plant = string.IsNullOrWhiteSpace(Model?.Plant) ? "QSMC" : Model.Plant.ToUpperInvariant();
+    var otherPlant = plant == "QSMC" ? "QMH" : "QSMC";
+
+    var syncQSMC = Model?.SyncRate_QSMC ?? 0;
+    var syncQMH = Model?.SyncRate_QMH ?? 0;
+    var nsQSMC = Model?.NotSynced_QSMC ?? 0;
+    var nsQMH = Model?.NotSynced_QMH ?? 0;
 }
-<div class="text-center" style="margin-top:50px;">
-    <h2>Welcome to the QMS PCN SYSTEM</h2>
+
+<style>
+    :root {
+        --green: #43be57;
+        --green-deep: #2ea34a;
+        --red: #c94545;
+        --red-deep: #b33636;
+        --teal: #7fc4cf;
+        --teal-weak: #cfe8eb;
+        --ok: #2fae46;
+        --ok-ring: #79e09a;
+        --ng: #e25555;
+        --ng-ring: #ffc2c2;
+        --gray-ring: #e2e8f0;
+        --page: #edf2f6;
+    }
+
+    html, body {
+        background: var(--page);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .wrap {
+        max-width: 1240px;
+        margin: 24px auto;
+        padding: 0 16px;
+        font-family: "Helvetica Neue",Arial,sans-serif;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        margin: 0 12px 18px;
+    }
+
+    .summary {
+        flex: 1 1 0;
+        display: flex;
+        align-items: stretch;
+        gap: 20px;
+        padding: 18px 24px;
+        min-height: 148px;
+        border-radius: 28px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 -10px 0 rgba(0,0,0,.05)
+    }
+
+    .summary--ok {
+        background: linear-gradient(180deg,var(--green) 0%, var(--green-deep) 100%);
+        border: 3px solid rgba(255,255,255,.28);
+    }
+
+    .summary--bad {
+        background: linear-gradient(180deg,var(--red) 0%, var(--red-deep) 100%);
+        border: 3px solid rgba(255,255,255,.22);
+    }
+
+    .summary__title {
+        flex: 0 0 180px;
+        display: flex;
+        align-items: center;
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+
+    .summary__stats {
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .stat-box {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: rgba(255,255,255,.06);
+        border: 2px dashed rgba(255,255,255,.85);
+        border-radius: 18px;
+        padding: 18px 22px;
+        position: relative;
+    }
+
+    .stat-box__plant {
+        font-size: 20px;
+        font-weight: 900;
+        color: #fff;
+    }
+
+    .stat-box__value {
+        font-size: 58px;
+        font-weight: 900;
+        line-height: 1;
+        margin-top: 6px;
+        color: #fff;
+    }
+
+    .stat-box .unit {
+        font-size: 22px;
+        font-weight: 800;
+        margin-left: 6px;
+        color: #fff;
+    }
+
+    .stat-box__suffix {
+        position: absolute;
+        right: 20px;
+        bottom: 14px;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .matrix {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin: 10px 12px;
+        margin-top: 60px;
+        box-shadow: 0 12px 28px rgba(0,0,0,.06);
+        overflow-x: auto;
+    }
+
+        .matrix table {
+            width: 100%;
+            border-collapse: collapse;
+            font-weight: 700;
+            color: #05313c;
+        }
+
+        .matrix thead th {
+            background: var(--teal);
+            color: #fff;
+            padding: 12px 10px;
+            font-weight: 900;
+            border: 1px solid var(--teal-weak);
+            text-align: center;
+            height: 56px;
+        }
+
+            .matrix thead th:first-child, .matrix tbody th:first-child {
+                background: var(--teal);
+                color: #fff;
+                font-weight: 900;
+            }
+
+        .matrix td, .matrix th {
+            border: 1px solid var(--teal-weak);
+            height: 66px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+            .matrix th:first-child, .matrix td:first-child {
+                width: 170px;
+            }
+
+    .icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        box-shadow: 0 6px 14px rgba(15,23,42,.14);
+        transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+
+    .icon-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        box-shadow: 0 3px 8px rgba(0,0,0,.08);
+        background: #fff;
+    }
+
+
+    /* icon có quyền */
+    .icon--ok {
+        background: #1fb855; /* xanh đậm */
+        border-color: #14a248;
+        color: #fff;
+    }
+
+    .icon--ng {
+        background: #d83a3a; /* đỏ thẫm */
+        border-color: #c22e2e;
+        color: #fff;
+    }
+    /* icon không có quyền nhưng vẫn giữ màu, chỉ làm mờ */
+    .icon--disabled {
+        opacity: 0.9; /* làm mờ */
+        filter: grayscale(40%); /* hơi giảm độ tươi */
+        cursor: not-allowed;
+    }
+
+
+    .icon-gray {
+        border: 3px solid var(--gray-ring);
+        color: #94a3b8;
+        background: #f8fafc;
+    }
+
+    .icon-ok svg path {
+        stroke: #fff;
+    }
+
+    .icon-ng svg path {
+        stroke: currentColor;
+    }
+
+    .icon-gray svg path {
+        stroke: #94a3b8;
+    }
+
+    .disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+
+    .icon--ok svg path,
+    .icon--ng svg path {
+        stroke: #ffffff !important;
+    }
+
+    .icon--disabled svg path {
+        stroke: #6b7280 !important;
+    }
+    /* hiệu ứng hover cho ô có quyền */
+    a.icon-link:hover .icon {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(15,23,42,.22);
+    }
+
+    /*.footer-bar {
+        height: 36px;
+        background: #8ecad4;
+        border-radius: 8px;
+        margin: 20px 12px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #052a33;
+        font-weight: 800;
+    }*/
+
+    .plant-bottom {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 12px 0 12px;
+    }
+
+    .plant-label {
+        color: #334155;
+        font-weight: 800;
+    }
+
+    .btn-plant {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #0f172a;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+        .btn-plant:hover {
+            box-shadow: 0 3px 12px rgba(16,24,40,.12);
+        }
+
+
+
+
+
+
+
+    .label {
+        font-weight: 800;
+        font-size: 18px;
+        letter-spacing: .5px;
+        margin-bottom: 6px;
+        opacity: .95;
+    }
+
+    .percent {
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 1;
+        color: #F9F9F9
+    }
+
+    .sync-card-S {
+        background: #63D665;
+        border-radius: 28px;
+        box-shadow: 0 6px 0 #63D665;
+        padding: 18px 22px 20px;
+        max-height: 170px;
+        width: 500px;
+    }
+
+    .sync-card-D {
+        background: #C53136;
+        border-radius: 28px;
+        box-shadow: 0 6px 0 var(--red-deep);
+        padding: 18px 22px 20px;
+        width: 500px;
+        max-height: 170px
+    }
+
+    .sync-title {
+        font-weight: 800;
+        font-size: 20px;
+        line-height: 1;
+        margin-bottom: 14px;
+        color: #F9F9F9
+    }
+
+    .sync-grid {
+        display: flex;
+        gap: 16px;
+    }
+
+    .sync-box {
+        flex: 1;
+        /*border: 2px dashed var(--border-dash);*/
+        border-radius: 18px;
+        padding: 1px 18px 16px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        border: 2px dashed #F9F9F9;
+    }
+
+    /* viền đứt bên trong */
+    /*.sync-box::after {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            border: 2px dashed var(--border-dash);
+            border-radius: 12px;
+            pointer-events: none;
+        }*/
+
+    .label {
+        font-weight: 800;
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .number {
+        font-weight: 900;
+        font-size: 48px;
+        line-height: 1;
+    }
+
+    .items {
+        font-weight: 700;
+        font-size: 20px;
+        color: #F9F9F9
+    }
+</style>
+
+<div class="wrap">
+    <div class="summary-row">
+
+        <div class="sync-card-S">
+            <div class="sync-title">Sync Rate:</div>
+            <div class="sync-grid">
+                <div class="sync-box">
+                    <div class="label">QSMC</div>
+                    <div class="percent">95%</div>
+                </div>
+                <div class="sync-box">
+                    <div class="label">QMH</div>
+                    <div class="percent">97%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sync-card-D">
+            <div class="sync-title">Not Synced:</div>
+            <div class="sync-grid">
+                <div class="sync-box">
+                    <div class="label">QSMC</div>
+                    <span class="percent">3  <span class="items">Items</span></span>
+
+                </div>
+                <div class="sync-box">
+                    <div class="label">QMH</div>
+
+                    <span class="percent">5  <span class="items">Items</span></span>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="matrix">
+        <table>
+            <thead>
+                <tr>
+                    <th style="background:#94a3b8">@plant</th>
+                    @foreach (var c in cols)
+                    {
+                        <th>@c</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ln in lines)
+                {
+                    <tr>
+                        <th>@ln</th>
+                        @foreach (var dp in cols)
+                        {
+                            var cell = CellOf(ln, dp);
+                            if (cell == null)
+                            {
+                                <td></td>
+                                ; continue;
+                            }
+
+                            // Xác định class icon: có quyền => xanh/đỏ; không quyền => xám
+                            var iconClass = cell.CanClick
+                                ? (cell.IsDone ? "icon icon--ok" : "icon icon--ng")
+                                : (cell.IsDone ? "icon icon--ok icon--disabled" : "icon icon--ng icon--disabled");
+
+                            // Dựng URL CHUẨN tới Pending (đừng Replace chuỗi)
+                            // Nếu app của bạn là PageController ➜ Pending(string p,string c,string plant,string dep,int? pid,int? cid)
+                            var pendingUrl = cell.CanClick
+                                        ? Url.Action(
+                                            "Pending",           // action
+                                            "Page",              // controller
+                                            new
+                                            {
+                                                p = cell.ParentName,
+                                                c = cell.ChildName,
+                                                plant = Model.Plant,
+                                                dep = cell.GroupDep,
+                                                pid = cell.ParentId,
+                                                cid = cell.ChildId
+                                            })
+                                        : "#";
+
+                            // SVG icon (✓/✕). Không quyền vẫn vẽ icon nhưng là màu xám do class .icon--disabled
+                            Func<IHtmlString> drawIcon = () => new HtmlString(
+                                cell.IsDone
+                                ? @"<svg width=""22"" height=""22"" viewBox=""0 0 24 24"" fill=""none""><path d=""M20 7L9 18l-5-5"" stroke-width=""3"" stroke-linecap=""round"" stroke-linejoin=""round""/></svg>"
+                                : @"<svg width=""22"" height=""22"" viewBox=""0 0 24 24"" fill=""none""><path d=""M6 6l12 12M18 6L6 18"" stroke-width=""3"" stroke-linecap=""round""/></svg>"
+                            );
+
+                            <td>
+                                @if (cell.CanClick)
+                                {
+                                    <a class="icon-link" href="@pendingUrl" title="@($"{ln} - {dp}")" aria-label="@($"{ln} - {dp}")">
+                                        <div class="@iconClass">@drawIcon()</div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div class="@iconClass" title="You do not have permission for this item" aria-disabled="true">
+                                        @drawIcon()
+                                    </div>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Switch plant dưới bảng -->
+    <div class="plant-bottom">
+        <a class="btn-plant" href="@Url.Action("Index","Home", new { plant = otherPlant })">
+            Switch to @otherPlant
+        </a>
+    </div>
 </div>

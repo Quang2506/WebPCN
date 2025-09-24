@@ -30,6 +30,8 @@ namespace Web_PCN.Controllers
             ViewBag.Title = $"{parent?.MenuText} → {child?.MenuText}";
             return View("Pending", data);
         }
+
+
         // QUERY (GET): mở form + nạp dropdown
         [HttpGet]
         public ActionResult Query(string p, string c, int? pid, int? cid)

@@ -1,4 +1,4 @@
-﻿﻿@using Web_PCN.Models.ViewModels
+﻿@using Web_PCN.Models.ViewModels
 @model LoginViewModel
 @{
     Layout = "~/Views/Shared/_Layout_Login.cshtml";
@@ -7,6 +7,71 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/Content/Site_login.css" />
+    <style>
+        /* ====== FORCE OVERRIDES — ƯU TIÊN CAO NHẤT CHO VIEW NÀY ====== */
+
+        /* 1) Icon size (phòng trường hợp có rule svg {width:100%}) */
+        svg.icon {
+            width: 18px !important;
+            height: 18px !important;
+            display: inline-block !important;
+            vertical-align: -0.125em !important;
+            flex: 0 0 auto !important;
+        }
+
+        .list-unstyled svg.icon {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .brand-badge svg.icon {
+            width: 28px !important;
+            height: 28px !important;
+        }
+
+        .brand-badge-sm svg.icon {
+            width: 24px !important;
+            height: 24px !important;
+        }
+
+        .input-group-text {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        /* 2) Nút LOGIN: đè tuyệt đối mọi rule khiến nền/opacity bị mất  */
+        #btnLogin {
+            background: #2563eb !important; /* nền rõ */
+            color: #fff !important; /* chữ trắng */
+            border: 1px solid #2563eb !important;
+            opacity: 1 !important;
+            filter: none !important; /* không mờ */
+            box-shadow: none !important;
+            pointer-events: auto !important;
+        }
+
+            #btnLogin:hover {
+                background: #1f55e0 !important;
+                border-color: #1f55e0 !important;
+            }
+
+            #btnLogin:active {
+                background: #1849c4 !important;
+                border-color: #1849c4 !important;
+            }
+
+            #btnLogin:disabled {
+                background: #2563eb !important;
+                border-color: #2563eb !important;
+                color: #fff !important;
+                opacity: .65 !important; /* chỉ mờ khi disable thật */
+            }
+
+        /* 3) Chặn mọi rule reset “.btn { background:transparent }” ở cấp cao hơn */
+        .btn, .btn-primary {
+            background-clip: border-box !important;
+        }
+    </style>
 }
 
 <section class="min-vh-100 d-flex align-items-center bg-auth">
@@ -16,16 +81,25 @@
             <div class="col-lg-6 d-none d-lg-block auth-left">
                 <div class="p-5">
                     <div class="d-flex align-items-center mb-4">
-                        <div class="brand-badge me-3"><i class="bi bi-laptop"></i></div>
+                        <div class="brand-badge me-3">
+                            <svg class="icon text-white" width="28" height="28"><use href="#i-laptop" /></svg>
+                        </div>
                         <div>
                             <h4 class="mb-0 text-white">Quanta PCN</h4>
                             <div class="text-white-50 small">Process Change Notice System</div>
                         </div>
                     </div>
+
                     <h2 class="text-white fw-semibold lh-sm mb-3">PROCESS CHANGE NOTICE</h2>
                     <ul class="list-unstyled text-white-50 mt-4 mb-0">
-                        <li class="mb-2"><i class="bi bi-check2-circle me-2 text-success"></i>PE/TE/AME/EQ/ME...</li>
-                        <li class="mb-2"><i class="bi bi-check2-circle me-2 text-success"></i>Synchronization between departments</li>
+                        <li class="mb-2">
+                            <svg class="icon me-2 text-success" width="20" height="20"><use href="#i-check2-circle" /></svg>
+                            PE/TE/AME/EQ/ME...
+                        </li>
+                        <li class="mb-2">
+                            <svg class="icon me-2 text-success" width="20" height="20"><use href="#i-check2-circle" /></svg>
+                            Synchronization between departments
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -33,7 +107,9 @@
             <!-- RIGHT -->
             <div class="col-lg-6 bg-white p-4 p-md-5">
                 <div class="text-center mb-4 d-lg-none">
-                    <div class="brand-badge brand-badge-sm mb-2"><i class="bi bi-laptop"></i></div>
+                    <div class="brand-badge brand-badge-sm mb-2">
+                        <svg class="icon text-white" width="24" height="24"><use href="#i-laptop" /></svg>
+                    </div>
                     <h4 class="fw-bold mb-0">Quanta PCN</h4>
                     <div class="text-muted small">SOP Information Page</div>
                 </div>
@@ -44,11 +120,13 @@
                 {
                     @Html.AntiForgeryToken()
 
-                    <!-- Login (User Name) -->
+                    <!-- Login -->
                     <div class="mb-3">
                         <label class="form-label">User Name</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <span class="input-group-text">
+                                <svg class="icon" width="18" height="18"><use href="#i-person" /></svg>
+                            </span>
                             @Html.TextBoxFor(m => m.Login, new
                             {
                                 @class = "form-control",
@@ -64,7 +142,9 @@
                     <div class="mb-3">
                         <label class="form-label">Password</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                            <span class="input-group-text">
+                                <svg class="icon" width="18" height="18"><use href="#i-shield-lock" /></svg>
+                            </span>
                             @Html.PasswordFor(m => m.Password, new
                             {
                                 @class = "form-control",
@@ -74,7 +154,7 @@
                             })
                             <button type="button" class="btn btn-outline-secondary" tabindex="-1"
                                     aria-label="Hiện/ẩn mật khẩu" onclick="togglePwd()">
-                                <i id="eye" class="bi bi-eye-slash"></i>
+                                <svg id="eye" class="icon" width="18" height="18"><use href="#i-eye-slash" /></svg>
                             </button>
                         </div>
                         @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
@@ -91,7 +171,9 @@
 
                     <!-- Submit -->
                     <button class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
-                            type="submit" id="btnLogin">
+                            type="submit" id="btnLogin"
+                            style="background:#2563eb!important;color:#fff!important;border:1px solid #2563eb!important;
+                               opacity:1!important;filter:none!important;box-shadow:none!important;">
                         <span>Login</span>
                         <span class="spinner-border spinner-border-sm d-none" id="spin" role="status" aria-hidden="true"></span>
                     </button>
@@ -106,9 +188,10 @@
         function togglePwd() {
             const eye = document.getElementById('eye');
             const pwd = document.getElementById('pwd');
-            if (!pwd) return;
-            if (pwd.type === 'password') { pwd.type = 'text'; eye.className = 'bi bi-eye'; }
-            else { pwd.type = 'password'; eye.className = 'bi bi-eye-slash'; }
+            if (!pwd || !eye) return;
+            const use = eye.querySelector('use');
+            if (pwd.type === 'password') { pwd.type = 'text'; use.setAttribute('href', '#i-eye'); }
+            else { pwd.type = 'password'; use.setAttribute('href', '#i-eye-slash'); }
         }
         document.getElementById('loginForm')?.addEventListener('submit', function () {
             document.getElementById('spin')?.classList.remove('d-none');

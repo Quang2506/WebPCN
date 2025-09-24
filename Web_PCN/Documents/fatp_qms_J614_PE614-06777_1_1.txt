@@ -1,0 +1,10 @@
+SN： J6T1222DEDE0000NQL+A
+
+component： C4P1133TEST0000DG7
+
+
+2. It use for station:
+Input: KB scan and visual inspection
+CompM0: KBBL scan and assemble
+CompM1:scan mic and speaker
+CompM4: Fan SN and MPM scan

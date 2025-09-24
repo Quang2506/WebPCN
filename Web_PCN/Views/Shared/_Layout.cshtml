@@ -1,19 +1,21 @@
-﻿@{
+﻿@using System.Web.Mvc
+@{
     Layout = null;
     var title = ViewBag.Title as string ?? "PCN Home";
 
-    // đã lưu ở bước login  dùng để lấy session
+    // lấy từ Session (set khi login)
     var userName = Session["UserName"] as string;
 
-    // === CỜ TÙY CHỌN: Chỉ trang nào set cờ này mới áp dụng thay đổi ===
-    bool hideLeft = (ViewBag.HideLeftMenu as bool?) == true;
+    // Cờ bật/tắt sidebar (mặc định false)
+    bool useLeftMenu = (ViewBag.UseLeftMenu as bool?) == true;
 
-    // Lớp cột cho MAIN: khi ẩn sidebar => full width
-    string mainCols = hideLeft ? "col-sm-12 col-md-12" : "col-sm-9 col-md-10";
+    // Lưới hiển thị main
+    string mainCols = useLeftMenu ? "col-sm-9 col-md-10" : "col-sm-12 col-md-12";
 
-    // Body class: chỉ khi hideLeft=true mới kích hoạt chế độ "main scroll"
-    string bodyClass = hideLeft ? "sfc-body sfc-body--main-scroll" : "sfc-body";
+    // Body class
+    string bodyClass = useLeftMenu ? "sfc-body sfc-body--main-scroll" : "sfc-body";
 }
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,95 +23,323 @@
     <title>@title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Bootstrap 3 CSS -->
+    <link href="~/Content/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
     <link href="~/Content/bootstrap3/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Site CSS -->
     <link href="~/Content/Site.css" rel="stylesheet" />
     @RenderSection("Styles", required: false)
 
     <style>
         /* ============================
-           Tối thiểu, chỉ tác động khi body có class .sfc-body--main-scroll
-           => các trang cũ không bị ảnh hưởng.
+           Áp dụng khi body có class .sfc-body--main-scroll
            ============================ */
-        .sfc-body--main-scroll {
-            overflow: hidden; /* khóa cuộn toàn trang */
-            background: #eef1f6; /* đồng bộ nền mới */
+        /*.sfc-body--main-scroll {
+            overflow: hidden;*/ /* khóa cuộn toàn trang */
+        /*background: #eef1f6;*/ /* nền */
+        /*}*/
+
+        .sfc-body--main-scroll .sfc-shell {
+            height: 100vh; /* full khung */
         }
 
-            .sfc-body--main-scroll .sfc-shell {
-                height: 100vh; /* khung làm việc */
-            }
-
-            .sfc-body--main-scroll .sfc-main {
+        /*.sfc-body--main-scroll .sfc-main {
                 height: 100%;
-                overflow: auto; /* CHỈ main cuộn */
-                -webkit-overflow-scrolling: touch;
+                overflow: auto;*/ /* chỉ main cuộn */
+        /*-webkit-overflow-scrolling: touch;
+            }*/
+
+        :root {
+            --bar: #87c9d3; /* xanh ngọc nền */
+            --bar-deep: #6fb9c6;
+            --white: #ffffff;
+            --link: #ffffff;
+            --link-hover: #eaf9fc;
+        }
+
+        /*  * {
+            box-sizing: border-box
+        }*/
+
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden; /* hoặc auto nếu bạn muốn cuộn khi cần */
+            box-sizing: border-box;
+        }
+
+
+        /*body {
+            margin: 0;
+            background: #111;*/ /* để nổi bật thanh header như ảnh */
+        /*font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+           max-height:100vh !important
+        }*/
+
+        /* ====== HEADER ====== */
+        .sfc-content {
+            min-height: calc(100vh - 156px);
+        }
+
+        .pcn-header {
+            background: linear-gradient(180deg, var(--bar) 0%, var(--bar-deep) 100%);
+            color: var(--white);
+            border-bottom: 1px solid rgba(0,0,0,.15);
+            box-shadow: 0 2px 0 rgba(255,255,255,.1) inset;
+            height: 50px;
+            width: 100%
+        }
+
+        /* TÙY CHỈNH FLEXBOX CHO HEADER */
+        .pcn-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Đẩy hai nhóm ra hai đầu */
+            flex-wrap: nowrap; /* Đảm bảo không xuống dòng */
+            gap: 20px; /* Khoảng cách giữa hai nhóm */
+        }
+
+        /* Nhóm bên trái: Home, Logo, Title */
+        .pcn-left-group {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Khoảng cách giữa các phần tử trong nhóm trái */
+        }
+
+        /* Nhóm bên phải: Links, ID, Logout */
+        .pcn-right-group {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Khoảng cách giữa các phần tử trong nhóm phải */
+            white-space: nowrap; /* Ngăn các phần tử xuống dòng */
+        }
+
+        /* Căn chỉnh các link con trong Nav */
+        .pcn-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* logo */
+        .pcn-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: auto;
+            height: 100%
+        }
+
+            .pcn-logo img {
+                width: 54px;
+                height: 54px;
+                object-fit: contain;
+                display: block;
+                filter: drop-shadow(0 1px 0 rgba(0,0,0,.12));
             }
 
-        /* Khi ẩn sidebar (hideLeft=true), co giãn lưới bootstrap tối thiểu */
+        /* title lớn */
+        .pcn-title {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            text-shadow: 0 1px 0 rgba(0,0,0,.15);
+            white-space: nowrap;
+        }
 
+        /* ID */
+        .pcn-id {
+            opacity: .95;
+            font-size: 20px;
+            white-space: nowrap;
+        }
+
+        /* link */
+        .pcn-links a {
+            color: var(--link);
+            text-decoration: none;
+            font-size: 20px;
+            padding: 2px 0;
+        }
+
+            .pcn-links a:hover {
+                color: var(--link-hover);
+                text-decoration: underline;
+            }
+
+        /* dấu ngăn cách | */
+        .pcn-links .sep {
+            color: rgba(255,255,255,.9);
+            margin: 0 2px;
+            user-select: none;
+        }
+
+        /* Sửa đổi kích thước nút Home */
+        .pcn-home-link {
+            font-size: 32px; /* Tăng kích thước icon Home */
+            color: var(--white);
+            transition: color 0.2s ease;
+            text-decoration: none;
+        }
+
+            .pcn-home-link:hover {
+                color: var(--link-hover);
+            }
+
+        /* Sửa đổi kích thước và hiệu ứng cho nút Logout */
+        .pcn-logout-link {
+            /*font-size: 26px;*/ /* Tăng kích thước icon Logout */
+            color: var(--link);
+            transition: color 0.2s ease;
+            text-decoration: none;
+            animation: blink-logout 2s infinite; /* Thêm hiệu ứng nhấp nháy */
+        }
+
+            .pcn-logout-link:hover {
+                color: var(--link-hover);
+            }
+
+        /* Định nghĩa keyframes cho hiệu ứng nhấp nháy */
+        @@keyframes blink-logout {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .footer-bar {
+            height: 50px;
+            background: #8ecad4;
+            /* border-radius: 8px; */
+            /* margin: 20px 12px 0; */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #052a33;
+            font-weight: 800;
+            color: #F9F9F9
+        }
+
+
+
+        .header {
+            background-color: #8ecad4; /* Màu xanh dương nhạt */
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+            .nav-links a {
+                color: white;
+                text-decoration: none;
+                font-weight: bold;
+            }
+
+            .nav-links .id {
+                font-style: italic;
+                font-size: 14px;
+                margin-left: 10px;
+            }
     </style>
 </head>
-<body class="@bodyClass">
+@*<body class="@bodyClass">*@
+<body>
     <div class="container-fluid sfc-shell">
         <div class="row">
-            <!-- SIDEBAR -->
-            @if (ViewBag.HideLeftMenu != true)
-            {
-                <aside class="col-sm-3 col-md-2 sfc-sidebar">
-                    @Html.Action("LeftMenu", "Home")
-                    @* hoặc nếu muốn dùng Partial trực tiếp, NHỚ truyền đúng model:
-                        @Html.Partial("_LeftMenu", (IEnumerable<Core.Dtos.MenuItem>)ViewBag.LeftMenu)
-                    *@
-                </aside>
-            }
+            @*@if (useLeftMenu)
+                {
+                    <aside class="col-sm-3 col-md-2 sfc-sidebar">
+                        @Html.Action("LeftMenu", "Home")
+                    </aside>
+                }*@
+
+            <main class="sfc-main">
+                @*<div class="pcn-header">
+                        <div class="pcn-inner">
+                            <div class="pcn-left-group">
+                                <a href="@Url.Action("Index", "Home")" class="pcn-home-link" title="Home">
+                                    <i class="fa fa-home"></i>
+                                </a>
+                                <div class="pcn-logo">
+                                    <img src="~/Content/images/quanta_logo.png" alt="Logo" />
+                                </div>
+                                <div class="pcn-title">Process Change Notice</div>
+                            </div>
+
+                            <div class="pcn-right-group">
+                                <nav class="pcn-links" aria-label="Quick links">
+                                    <a href="#">My Approvals</a><span class="sep">|</span>
+                                    <a href="#">My change request</a><span class="sep">|</span>
+                                    <a href="#">Create change request</a>
+                                </nav>
+                                <div class="pcn-id">ID: A7080870</div>
+                                <a href="@Url.Action("Logout", "Account")" class="pcn-logout-link" title="Logout">
+                                    <i class="fa fa-sign-out"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>*@
 
 
-            <!-- MAIN -->
-        <main class="@mainCols sfc-main">
-            <!-- Topbar -->
-            <div class="sfc-topbar clearfix">
-                <span class="sfc-topbar-title">@title</span>
-                <div class="pull-right">
-                    <div class="sfc-userbox">
-                        <span class="glyphicon glyphicon-user sfc-userbox__icon"></span>
-                        <span class="sfc-userbox__text"> @Session["UserName"]</span>
+
+
+                <div class="header">
+                    <div class="logo-title">
+                        <img class="logo" src="~/Content/images/quanta_logo.png" alt="Logo" />
+                        <h1 style="font-weight:bold;font-size:30px">Process Change Notice</h1>
+                    </div>
+                    <div class="nav-links">
+                        <a href="#"> My Approvals   </a><span class="sep">|</span>
+                        <a href="@Url.Action("Query", "Page")">My change request</a><span class="sep">|</span>
+                        <a href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">Create change request</a><span class="sep">|</span>
+                        <span class="id"> <a href="@Url.Action("Logout", "Account")" class="pcn-logout-link" title="Logout"> @Session["UserName"]</a></span>
                     </div>
                 </div>
-            </div>
 
 
-            <!-- Content -->
-            <div class="sfc-content">
-                @RenderBody()
-            </div>
-        </main>
+                <div class="sfc-content">
+                    @RenderBody()
+                </div>
+
+                <div class="footer-bar">Copyright QMH QMS</div>
+            </main>
         </div>
+
     </div>
 
     <script src="~/Scripts/jquery-3.4.1.min.js"></script>
     <script src="~/Scripts/bootstrap3/bootstrap.min.js"></script>
     @RenderSection("scripts", required: false)
-
-    <script>
-        (function () {
-            // Đảm bảo chỉ mở 1 nhóm con trong .sfc-menu
-            $(document).on('click', '.sfc-parent__link', function () {
-                var $link = $(this);
-                var target = $($link.data('target'));
-                var $siblings = $link.closest('ul.sfc-menu, ul.sfc-submenu')
-                    .find('> li > ul.collapse').not(target);
-                $siblings.collapse('hide'); // đóng các nhóm khác
-            });
-
-            // Cập nhật aria-expanded để CSS caret xoay
-            $('.sfc-menu').on('shown.bs.collapse hidden.bs.collapse', function (e) {
-                var $ul = $(e.target);
-                var $a = $('a[data-target="#' + $ul.attr('id') + '"]');
-                $a.attr('aria-expanded', $ul.hasClass('in'));
-            });
-        })();
-    </script>
 </body>
 </html>

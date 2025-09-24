@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using System.Web.Security;                  // <-- cần cho FormsAuthentication
+using System.Web.Security;                  // FormsAuthentication
 using Core.Dtos;
 using Data.Repositories;
 using Services;
@@ -21,7 +22,10 @@ namespace Web_PCN.Controllers
         [AllowAnonymous]
         public ActionResult Login()
         {
-           
+            // Nếu đã đăng nhập rồi thì về thẳng Home
+            if (Request.IsAuthenticated)
+                return RedirectToAction("Index", "Home");
+
             return View("~/Views/Login/Login.cshtml", new LoginViewModel());
         }
 
@@ -33,36 +37,54 @@ namespace Web_PCN.Controllers
             if (!ModelState.IsValid)
                 return View("~/Views/Login/Login.cshtml", vm);
 
-            // Map ViewModel -> DTO
-            var dto = new LoginRequest { Login = vm.Login, Password = vm.Password };
-
-            var rs = await _authService.LoginAsync(dto);
-            if (rs == null || rs.StatusCode != 0)
+            try
             {
-                ModelState.AddModelError("", rs?.Message ?? "Login fail!");
+                // Map ViewModel -> DTO
+                var dto = new LoginRequest { Login = vm.Login, Password = vm.Password };
+
+                var rs = await _authService.LoginAsync(dto);
+
+                // Thất bại (theo quy ước của bạn: StatusCode != 0)
+                if (rs == null || rs.StatusCode != 0)
+                {
+                    ModelState.AddModelError("", rs?.Message ?? "Login fail!");
+                    return View("~/Views/Login/Login.cshtml", vm);
+                }
+
+                // ==== Đăng nhập thành công: set Session cho LeftMenu & các phần khác (GIỮ NGUYÊN) ====
+                Session["UserName"] = rs.User_id;        // LeftMenu/_menuService.GetMenuTree(user) dùng cái này
+                Session["DisplayName"] = rs.Fullname;
+                Session["Email"] = rs.Email;
+                Session["Dept"] = rs.dep_c;
+                Session["GroupDept"] = rs.group_dept;
+                Session["Permit"] = rs.permit?.ToString();
+                Session["Role"] = rs.RoleName;       // có thể null nếu SP không trả
+
+                // ==== Đánh dấu đã đăng nhập (cookie xác thực) ====
+                FormsAuthentication.SetAuthCookie(rs.User_id, vm.RememberMe);
+
+                // Nếu có ReturnUrl hợp lệ -> chuyển sau hiệu ứng (vẫn giữ hiệu ứng)
+                string nextUrl = Url.Action("Index", "Home");
+                var returnUrl = Request.QueryString["ReturnUrl"];
+                if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    nextUrl = returnUrl;
+
+                // ===== MÀN HIỆU ỨNG THÀNH CÔNG (không mất dữ liệu cũ) =====
+                ViewBag.NextUrl = nextUrl;
+                ViewBag.UserName = rs.Fullname ?? rs.User_id ?? "User";
+                return View("~/Views/Login/LoginSuccess.cshtml");
+            }
+            catch (Exception ex)
+            {
+                // Không để lộ lỗi thô ra UI; bạn có thể log nội bộ
+                ModelState.AddModelError("", "Unexpected error. Please try again.");
+                // TODO: log ex
                 return View("~/Views/Login/Login.cshtml", vm);
             }
-
-            // ==== Đăng nhập thành công: set Session cho LeftMenu ====
-            Session["UserName"] = rs.User_id;        // LeftMenu/_menuService.GetMenuTree(user) đang dùng cái này
-            Session["DisplayName"] = rs.Fullname;
-            Session["Email"] = rs.Email;
-            Session["Dept"] = rs.dep_c;
-            Session["GroupDept"] = rs.group_dept;
-            Session["Permit"] = rs.permit?.ToString();
-            Session["Role"] = rs.RoleName;       // có thể null nếu SP không trả
-
-            // ==== QUAN TRỌNG: đánh dấu đã đăng nhập (tránh bị redirect về Login) ====
-            FormsAuthentication.SetAuthCookie(rs.User_id, vm.RememberMe);
-
-            // Xử lý ReturnUrl nếu có
-            var returnUrl = Request.QueryString["ReturnUrl"];
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            return RedirectToAction("Index", "Home");
         }
 
+        [HttpGet]
+        [Authorize]
         public ActionResult Logout()
         {
             // Xoá cookie xác thực + session

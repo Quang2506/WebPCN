@@ -12,12 +12,10 @@ namespace Web_PCN.Controllers
 {
     public class WorkFlowController : Controller
     {
-        //private readonly string _connectionString;
-        private readonly WorkFlowRepository _WorkFlow = new WorkFlowRepository();
+        private readonly WorkFlowService _WorkFlow = new WorkFlowService();
 
         public WorkFlowController()
         {
-            //_connectionString = ConfigurationManager.ConnectionStrings["WebPCN"].ConnectionString;
         }
 
         [HttpGet]
@@ -30,8 +28,9 @@ namespace Web_PCN.Controllers
 
             //string dep_c = (Session["Dept"] as string) ?? "";
 
-            var statusHistory = _WorkFlow.GetJobStatusHistory(changeRequestID, dep_c);
-            return View("JobStatus", statusHistory);
+            var data = _WorkFlow.GetJobStatusHistory(changeRequestID, dep_c);
+
+            return View("JobStatus", data);
         }
     }
 }
