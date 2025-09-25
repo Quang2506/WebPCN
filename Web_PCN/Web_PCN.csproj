@@ -199,6 +199,7 @@
     <Content Include="Views\WorkFlow\JobStatus.cshtml" />
     <Content Include="Views\Login\LoginSuccess.cshtml" />
     <Content Include="Views\Shared\_IconsSprite.cshtml" />
+    <Content Include="Views\Page\MyChangeRequest.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

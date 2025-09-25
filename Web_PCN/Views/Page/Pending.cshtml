@@ -1,70 +1,75 @@
-﻿@model IEnumerable<Core.Dtos.ChangeRequestDto>
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+﻿@model IEnumerable<Core.Dtos.ChangeRequests>
 
-    // Lấy breadcrumb (đã set ở controller)
-    var parent = (Session["MenuParentName"] as string) ?? "";
-    var child = (Session["MenuChildName"] as string) ?? "";
-}
+    @{
+        Layout = "~/Views/Shared/_Layout.cshtml";
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <strong>Pending request</strong>
-        <div class="pull-right">
-            <a class="btn btn-primary btn-xs"
-               href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
-                Create new request
-            </a>
-            <a class="btn btn-default btn-xs"
-               href="@Url.Action("Query", "Page", new { p = parent, c = child })">
-                Query
-            </a>
+        // Lấy breadcrumb (đã set ở controller)
+        var parent = (Session["MenuParentName"] as string) ?? "";
+        var child = (Session["MenuChildName"] as string) ?? "";
+    }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Pending request</strong>
+            <div class="pull-right">
+                <a class="btn btn-primary btn-xs"
+                   href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
+                    Create new request
+                </a>
+                <a class="btn btn-default btn-xs"
+                   href="@Url.Action("Query", "Page", new { p = parent, c = child })">
+                    Query
+                </a>
+            </div>
+            <div class="clearfix"></div>
         </div>
-        <div class="clearfix"></div>
-    </div>
 
-    <div class="panel-body">
+        <div class="panel-body">
 
 
-        @if (Model != null && Model.Any())
-        {
-            <div style="max-height: 660px; overflow-y: auto">
-                <table  class="table table-bordered table-hover table-condensed">
+            @if (Model?.Any() == true)
+            {
+                <table class="table table-bordered table-hover table-condensed">
                     <thead>
-                       <tr class="info">
-                           <th style="width:160px;">Document code</th>
-                           <th style="width:90px;">Category</th>
-                           <th style="width:90px;">Version</th>
-                           <th>Change title</th>
-                           <th style="width:150px;">Department</th>
-                           <th style="width:150px;">Status</th>
-                           <th style="width:150px;">TransDateTime</th>
-                       </tr>
+                        <tr class="info">
+                            <th style="width:160px;">DocumentCode</th>
+                            <th style="width:90px;">Version</th>
+                            <th style="width:90px;">Model</th>
+                            <th>Change title</th>
+                            <th style="width:150px;">Department</th>
+                            <th style="width:150px;">Factory</th>
+                            <th style="width:150px;">Site</th>
+
+
+                            <th style="width:150px;">Status</th>
+                        </tr>
                     </thead>
                     <tbody>
                         @foreach (var r in Model)
                         {
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("ChangeRequestDetail","ChangeRequest", new { requestid = r.RequestID, dep_c = r.Department })">
-                                        @r.Code
+                                    <a href="@Url.Action("ChangeRequestDetail","ChangeRequest",new { requestid = r.requestid, dep_c = r.dep_c })">
+                                        @r.DocumentCode
                                     </a>
+                                    @*<a>#@r.DocumentCode</a>*@
                                 </td>
-                                <td>@r.Category</td>
-                                <td>@r.Version</td>
-                                <td>@r.ChangeTitle</td>
-                                <td>@r.Department</td>
-                                <td>@r.Status</td>
-                                <td>@r.TransDateTime</td>
+                                <td>@r.version</td>
+                                <td>@r.Model</td>
+                                <td class="text-danger">@r.ChangeTitle</td>
+                                <td>@r.dep_nm</td>
+                                <td>@r.factory</td>
+                                <td>@r.site</td>
+
+                                <td class="text-danger">@r.status_nm</td>
                             </tr>
                         }
                     </tbody>
                 </table>
-                </div>
-                }
-                else
-                {
+            }
+            else
+            {
                 <div class="text-muted">No data.</div>
-                }
-            </div>
+            }
         </div>
+    </div>

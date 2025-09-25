@@ -10,7 +10,7 @@ namespace Core.Dtos
     {
         public string ChangeRequestID { get; set; }   // Mã yêu cầu thay đổi
         public string Dep_c { get; set; }             // Phòng ban
-        public int Status { get; set; }               // Mã trạng thái
+        public string Status { get; set; }            // Mã trạng thái
         public string Status_nm { get; set; }         // Tên trạng thái
         public string Confirm_per { get; set; }       // Người xác nhận
         public DateTime Confirm_dt { get; set; }      // Thời gian xác nhận

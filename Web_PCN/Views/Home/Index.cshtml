@@ -30,6 +30,7 @@
     var syncQMH = Model?.SyncRate_QMH ?? 0;
     var nsQSMC = Model?.NotSynced_QSMC ?? 0;
     var nsQMH = Model?.NotSynced_QMH ?? 0;
+    var Total = Model?.Total ?? 0;
 }
 
 <style>
@@ -61,6 +62,7 @@
         margin: 24px auto;
         padding: 0 16px;
         font-family: "Helvetica Neue",Arial,sans-serif;
+        height: 90%
     }
 
     .summary-row {
@@ -68,6 +70,7 @@
         justify-content: space-between;
         gap: 24px;
         margin: 0 12px 18px;
+        margin-top: 30px
     }
 
     .summary {
@@ -345,7 +348,7 @@
         box-shadow: 0 6px 0 #63D665;
         padding: 18px 22px 20px;
         max-height: 170px;
-        width: 500px;
+        width: 50%;
     }
 
     .sync-card-D {
@@ -353,7 +356,7 @@
         border-radius: 28px;
         box-shadow: 0 6px 0 var(--red-deep);
         padding: 18px 22px 20px;
-        width: 500px;
+        width: 50%;
         max-height: 170px
     }
 
@@ -411,21 +414,52 @@
         font-size: 20px;
         color: #F9F9F9
     }
+
+    .plant-switch {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        justify-content: center;
+        margin-top: 30px
+    }
+
+    .switch-btn {
+        padding: 6px 16px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 13px;
+        transition: .2s;
+        background: #f3f4f6;
+        color: #374151;
+        background: #F9F9F9 !important;
+        border: 1px solid #ccc;
+        /*border-radius: 6px;*/
+    }
+
+        .switch-btn.active {
+            background: #8ecad4 !important; /* xanh khi chọn */
+            color: #fff;
+        }
+
+        .switch-btn.inactive {
+            background: #e5e7eb; /* xám nhạt khi không chọn */
+            color: #6b7280;
+        }
 </style>
 
 <div class="wrap">
     <div class="summary-row">
 
         <div class="sync-card-S">
-            <div class="sync-title">Sync Rate:</div>
+            <div class="sync-title"> <span>Sync Rate:</span><span style="float: right;">Total: @Total</span></div>
             <div class="sync-grid">
                 <div class="sync-box">
                     <div class="label">QSMC</div>
-                    <div class="percent">95%</div>
+                    <div class="percent"> @syncQSMC <span>%</span> </div>
                 </div>
                 <div class="sync-box">
                     <div class="label">QMH</div>
-                    <div class="percent">97%</div>
+                    <div class="percent"> @syncQMH <span>%</span> </div>
                 </div>
             </div>
         </div>
@@ -435,13 +469,13 @@
             <div class="sync-grid">
                 <div class="sync-box">
                     <div class="label">QSMC</div>
-                    <span class="percent">3  <span class="items">Items</span></span>
+                    <span class="percent">@nsQSMC <span class="items">Items</span></span>
 
                 </div>
                 <div class="sync-box">
                     <div class="label">QMH</div>
 
-                    <span class="percent">5  <span class="items">Items</span></span>
+                    <span class="percent">@nsQMH <span class="items">Items</span></span>
 
                 </div>
             </div>
@@ -483,18 +517,17 @@
                             // Nếu app của bạn là PageController ➜ Pending(string p,string c,string plant,string dep,int? pid,int? cid)
                             var pendingUrl = cell.CanClick
                                         ? Url.Action(
-                                            "Pending",           // action
+                                            "Query",           // action
                                             "Page",              // controller
                                             new
                                             {
-                                                p = cell.ParentName,
-                                                c = cell.ChildName,
+
                                                 plant = Model.Plant,
                                                 dep = cell.GroupDep,
-                                                pid = cell.ParentId,
-                                                cid = cell.ChildId
                                             })
                                         : "#";
+
+
 
                             // SVG icon (✓/✕). Không quyền vẫn vẽ icon nhưng là màu xám do class .icon--disabled
                             Func<IHtmlString> drawIcon = () => new HtmlString(
@@ -525,9 +558,15 @@
     </div>
 
     <!-- Switch plant dưới bảng -->
-    <div class="plant-bottom">
-        <a class="btn-plant" href="@Url.Action("Index","Home", new { plant = otherPlant })">
-            Switch to @otherPlant
+
+    <div class="plant-switch">
+        <a href="@Url.Action("Index","Home", new { plant="QMH" })"
+           class="switch-btn @(Model.Plant=="QMH" ? "active" : "inactive")">
+            QMH
+        </a>
+        <a href="@Url.Action("Index","Home", new { plant="QSMC" })"
+           class="switch-btn @(Model.Plant=="QSMC" ? "active" : "inactive")">
+            QSMC
         </a>
     </div>
 </div>

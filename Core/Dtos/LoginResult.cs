@@ -18,5 +18,8 @@ namespace Core.Dtos
         public string group_dept { get; set; }
         public int? permit { get; set; }      // mã permit
         public string RoleName { get; set; }  // admin/manager/staff...
+        public string site { get; set; }
+        public string factory { get; set;}
+        public string dep_nm { get; set; }
     }
 }

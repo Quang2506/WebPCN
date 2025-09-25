@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Core.Dtos;
+using Dapper;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using Dapper;
-using Core.Dtos;
+using System.Linq;
 
 namespace Data.Repositories
 {
@@ -13,9 +14,10 @@ namespace Data.Repositories
             using (var conn = Db.GetConnection())
             {
                 return conn.Query<WorkFlow>(
-                    "dbo.PCN_GetJobStatusHistory",
+                    "dbo.PCN_GetJobStatusHistory_New",
                     new
                     {
+                        FunctionType = "Get_JobStatus",
                         ChangeRequestID = changeRequestID,
                         Dep_c = dep_c
                     },

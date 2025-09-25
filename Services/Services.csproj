@@ -69,6 +69,7 @@
     <Compile Include="DashboardService.cs" />
     <Compile Include="IAuthService.cs" />
     <Compile Include="MenuService.cs" />
+    <Compile Include="UserService.cs" />
     <Compile Include="WorkFlowService.cs" />
     <Compile Include="PageService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

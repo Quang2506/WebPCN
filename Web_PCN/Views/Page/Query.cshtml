@@ -18,7 +18,8 @@
         margin-bottom: 6px
     }
 
-    .form-group select {
+    .form-group select,
+    .form-group input[type=text] {
         height: 38px;
         padding: 6px 10px;
         border: 1px solid #d1d5db;
@@ -29,7 +30,8 @@
         transition: .2s
     }
 
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group input[type=text]:focus {
             outline: none;
             background: #fff;
             border-color: #3b82f6;
@@ -41,7 +43,7 @@
         justify-content: space-between;
         margin-top: 8px
     }
-    /* --- empty state khi không có data --- */
+    /* --- empty state --- */
     .empty {
         border: 1px dashed #cfd6e5;
         border-radius: 10px;
@@ -85,34 +87,27 @@
             @Html.HiddenFor(m => m.ChildName)
             @Html.HiddenFor(m => m.ParentId)
             @Html.HiddenFor(m => m.ChildId)
+            @Html.HiddenFor(m => m.DepCode)
+            @Html.HiddenFor(m => m.Plant)
             <div class="form-grid">
                 <div class="form-group">
                     <label>Category</label>
                     @Html.DropDownListFor(m => m.Category,
-                             Model.CategoryList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
-                             "-- All categories --",
-                             new { @class = "form-control" })
+                                  Model.CategoryList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
+                                  "-- All categories --",
+                                  new { @class = "form-control" })
                 </div>
                 <div class="form-group">
                     <label>Status</label>
-                    @Html.DropDownListFor(m => m.Status,
-                             Model.StatusList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
-                             "-- All status --",
-                             new { @class = "form-control" })
+                    @Html.TextBoxFor(m => m.Status, new { @class = "form-control", placeholder = "Enter status..." })
                 </div>
                 <div class="form-group">
                     <label>Document code</label>
-                    @Html.DropDownListFor(m => m.DocumentCode,
-                             Model.DocumentCodeList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
-                             "-- All document codes --",
-                             new { @class = "form-control" })
+                    @Html.TextBoxFor(m => m.DocumentCode, new { @class = "form-control", placeholder = "Enter document code..." })
                 </div>
                 <div class="form-group">
-                    <label>Changes title</label>
-                    @Html.DropDownListFor(m => m.ChangeTitle,
-                             Model.ChangeTitleList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
-                             "-- All titles --",
-                             new { @class = "form-control" })
+                    <label>Change title</label>
+                    @Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control", placeholder = "Enter change title..." })
                 </div>
             </div>
             <div class="form-actions">
@@ -141,7 +136,7 @@
                         <tr>
                             <td>
                                 <a href="@Url.Action("ChangeRequestDetail","ChangeRequest",
-                                        new { requestid = r.RequestID, dep_c = r.Department })">
+                                       new { requestid = r.RequestID, dep_c = r.Department })">
                                     @r.Code
                                 </a>
                             </td>
@@ -161,7 +156,7 @@
             <div class="empty">
                 <div class="emoji">🗂️</div>
                 <h5>No data found</h5>
-                <p>Hãy thay đổi bộ lọc bên trên rồi nhấn <strong>Query</strong>.</p>
+
             </div>
         }
     </div>

@@ -3,32 +3,76 @@ using System.Linq;
 using System.Web.Mvc;
 using Core.Dtos;
 using Data.Repositories;
-public class PageService
+namespace Services
 {
-    private readonly PageRepository _repo = new PageRepository();
-    // Pending
-    public IEnumerable<ChangeRequestDto> GetChangeRequestsByMenu(
-        string p, string c, string user, int? parentId, int? childId)
-        => _repo.GetChangeRequestsByMenu(p, c, user, parentId, childId);
-    // Query
-    public IEnumerable<ChangeRequestDto> QueryChangeRequests(
-        string p, string c, string user,
-        string category, string doc, string title, string status,
-        int? parentId, int? childId)
-        => _repo.QueryChangeRequests(p, c, user, category, doc, title, status, parentId, childId);
-    // ===== LẤY DỮ LIỆU DROPDOWN (category/status/doc/title) =====
-    public IEnumerable<SelectListItem> GetOptionList(
-        string optionType,               // "category" | "status" | "doc" | "title"
-        string parentName, string childName,
-        string userName,                 // <<< cần truyền user
-        int? parentId, int? childId)
+    public class PageService
     {
-        var rows = _repo.GetLookups(optionType, parentName, childName, userName, parentId, childId);
-        // Map sang SelectListItem
-        return rows.Select(x => new SelectListItem
+        private readonly PageRepository _repo = new PageRepository();
+        // ================== HÀM CŨ (giữ nguyên cho các màn khác) ==================
+        // Pending theo menu (parent/child)
+        public IEnumerable<ChangeRequestDto> GetChangeRequestsByMenu(
+            string p, string c, string user, int? parentId, int? childId)
         {
-            Value = string.IsNullOrWhiteSpace(x.Value) ? x.Text : x.Value,
-            Text = string.IsNullOrWhiteSpace(x.Text) ? x.Value : x.Text
-        }).ToList();
+            return _repo.GetChangeRequestsByMenu(p, c, user, parentId, childId);
+        }
+        // Query theo menu (parent/child) + các bộ lọc
+        public IEnumerable<ChangeRequestDto> QueryChangeRequests(
+            string p, string c, string user,
+            string category, string doc, string title, string status,
+            int? parentId, int? childId)
+        {
+            return _repo.QueryChangeRequests(p, c, user, category, doc, title, status, parentId, childId);
+        }
+        // Lookup (category/status/doc/title) theo menu
+        //public IEnumerable<SelectListItem> GetOptionList(
+        //    string optionType,                // "category" | "status" | "doc" | "title"
+        //    string parentName, string childName,
+        //    string userName,
+        //    int? parentId, int? childId)
+        //{
+        //    var rows = _repo.GetLookups(optionType, parentName, childName, userName, parentId, childId);
+        //    // Map sang SelectListItem
+        //    return rows.Select(x => new SelectListItem
+        //    {
+        //        Value = string.IsNullOrWhiteSpace(x.Value) ? x.Text : x.Value,
+        //        Text = string.IsNullOrWhiteSpace(x.Text) ? x.Value : x.Text
+        //    }).ToList();
+        //}
+        // ================== HÀM MỚI (theo PLANT + DEP_CODE) ==================
+        /// <summary>
+        /// Danh sách mặc định cho Query (giống Pending) theo Plant + DepCode.
+        /// </summary>
+        public IEnumerable<ChangeRequestDto> GetChangeRequestsByDep(string plant, string depCode, string user)
+        {
+            // Repository cần có SP/Query tương ứng (ví dụ: PCN_Query_ByDep)
+            return _repo.GetChangeRequestsByDep(plant, depCode, user);
+        }
+        /// <summary>
+        /// Lọc lại theo Plant + DepCode + các bộ lọc (chỉ Category là dropdown, phần còn lại text).
+        /// </summary>
+        public IEnumerable<ChangeRequestDto> QueryChangeRequestsByDep(
+            string plant,
+            string depCode,
+            string user,
+            string category,
+            string doc,
+            string title,
+            string status)
+        {
+            // Repository cần có SP/Query tương ứng (ví dụ: PCN_Query_ByDep_Filter)
+            return _repo.QueryChangeRequestsByDep(plant, depCode, user, category, doc, title, status);
+        }
+        /// <summary>
+        /// Dropdown Category theo Plant + DepCode (riêng màn Query mới).
+        /// </summary>
+        public IEnumerable<SelectListItem> GetCategoryListByDep(string plant, string depCode)
+        {
+            var rows = _repo.GetCategoryLookupByDep(plant, depCode); // trả về (Text, Value)
+            return rows.Select(x => new SelectListItem
+            {
+                Value = string.IsNullOrWhiteSpace(x.Value) ? x.Text : x.Value,
+                Text = string.IsNullOrWhiteSpace(x.Text) ? x.Value : x.Text
+            }).ToList();
+        }
     }
 }

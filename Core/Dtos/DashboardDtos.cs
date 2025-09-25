@@ -44,6 +44,7 @@ namespace Core.Dtos
         public string Plant { get; set; }            // QSMC / QMH
         public int SyncRatePercent { get; set; }
         public int NotSyncedCount { get; set; }
+        public int Total { get; set; }
     }
     public class DashboardViewModel
     {
@@ -52,6 +53,7 @@ namespace Core.Dtos
         public int SyncRate_QMH { get; set; }
         public int NotSynced_QSMC { get; set; }
         public int NotSynced_QMH { get; set; }
+        public int Total { get; set; }
         public List<string> Lines { get; set; } = new List<string>();
         public List<string> Depts { get; set; } = new List<string>();
         public List<DeptCell> Grid { get; set; } = new List<DeptCell>();

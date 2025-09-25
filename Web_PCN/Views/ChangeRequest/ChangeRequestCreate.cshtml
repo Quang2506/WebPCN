@@ -1,7 +1,21 @@
 ﻿@model Core.Dtos.ChangeRequests
 @{
     ViewBag.Title = "ChangeRequestCreate";
+
+    // Is new request (chưa có id)
+    var isNew = string.IsNullOrWhiteSpace(Model?.requestid);
+
+    // KHÔNG đụng tới Model.status để khỏi cần sửa DTO.
+    int status = 0;
+    try { status = (int)(ViewBag.Status ?? 0); } catch { status = 0; }
+
+    // ✅ Nếu là tạo mới thì luôn coi là draft -> mở khóa nhập liệu
+    if (isNew) { status = 1; }
+
+    // Khóa input chỉ khi KHÔNG phải bản mới và status != 1
+    var isLocked = !isNew && status != 1;
 }
+
 @section Styles {
     <link rel="stylesheet" href="~/Content/changerequest.css" />
     <style>
@@ -18,6 +32,39 @@
             --blue2: #2563eb;
         }
 
+        html, body {
+            height: auto !important;
+            min-height: 100% !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            background: #f3f4f6;
+            scrollbar-gutter: stable;
+        }
+
+        body {
+            scrollbar-width: thin;
+            scrollbar-color: #c7d2fe #eef2ff;
+        }
+
+            body::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            body::-webkit-scrollbar-thumb {
+                background: #c7d2fe;
+                border-radius: 8px;
+            }
+
+            body::-webkit-scrollbar-track {
+                background: #eef2ff;
+            }
+
+        .page {
+            max-width: 1220px;
+            margin: 10px auto 24px;
+            padding: 0 16px 48px;
+        }
+
         .top-actions {
             position: sticky;
             top: 0;
@@ -25,13 +72,13 @@
             display: flex;
             justify-content: flex-end;
             gap: 8px;
-            padding: 8px 0 0
+            padding: 8px 0 0;
+            background: linear-gradient(to bottom,#f3f4f6 70%,rgba(243,244,246,0));
         }
 
         .btn {
             --btn-bg: #f1f4fa;
             --btn-color: #1f2a37;
-            position: relative;
             border: 1px solid transparent;
             border-radius: 10px;
             padding: 9px 14px;
@@ -39,47 +86,40 @@
             background: var(--btn-bg);
             color: var(--btn-color);
             cursor: pointer;
-            transition: transform .12s,box-shadow .18s
+            transition: transform .12s, box-shadow .18s;
         }
 
             .btn:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 8px 20px rgba(31,42,55,.10)
+                box-shadow: 0 8px 20px rgba(31,42,55,.10);
             }
 
         .btn-outline {
             --btn-bg: #fff;
-            border: 1px solid #d3dbe7
+            border: 1px solid #d3dbe7;
         }
 
         .btn-primary {
             --btn-bg: linear-gradient(180deg,var(--blue1),var(--blue2));
-            --btn-color: #fff
+            --btn-color: #fff;
         }
 
         .btn-success {
             --btn-bg: linear-gradient(180deg,#22c55e,#16a34a);
-            --btn-color: #fff
+            --btn-color: #fff;
         }
 
-        .page {
-            max-width: 1220px;
-            margin: 10px auto 0;
-            padding: 0 16px
-        }
-
-        .page--scroll {
-            height: calc(100vh - 16px);
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-bottom: 48px
+        .btn-disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            filter: grayscale(.2);
         }
 
         .content-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 14px;
-            margin-top: 6px
+            margin-top: 6px;
         }
 
         .card {
@@ -87,40 +127,36 @@
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: var(--card-pad);
-            box-shadow: 0 4px 14px rgba(31,42,55,.06)
+            box-shadow: 0 4px 14px rgba(31,42,55,.06);
         }
-
-            .card + .card {
-                margin-top: 10px
-            }
 
         .card-title {
             font-weight: 700;
             font-size: 16px;
-            margin: 2px 0 10px
+            margin: 2px 0 10px;
         }
 
         .form-grid {
             display: grid;
             grid-template-columns: repeat(3,minmax(220px,1fr));
             column-gap: var(--gap-x);
-            row-gap: var(--gap-y)
+            row-gap: var(--gap-y);
         }
 
             .form-grid .full {
-                grid-column: 1/-1
+                grid-column: 1/-1;
             }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: var(--field-gap)
+            gap: var(--field-gap);
         }
 
             .form-group label {
                 font-size: 11.5px;
                 color: #6b7788;
-                font-weight: 600
+                font-weight: 600;
             }
 
             .form-control, .form-group input[type=text], .form-group select {
@@ -142,7 +178,6 @@
                 resize: vertical;
             }
 
-        /* Readonly KHÔNG làm nhạt */
         input[readonly], textarea[readonly] {
             background: #f7f9fc !important;
             color: #1f2a37 !important;
@@ -156,14 +191,20 @@
             padding: 16px;
             background: linear-gradient(180deg,#fbfdff 0%,#f6f9ff 100%);
             text-align: center;
-            color: #7c8799
+            color: #7c8799;
         }
+
+            .dropzone.disabled {
+                opacity: .6;
+                pointer-events: none;
+                filter: grayscale(.3);
+            }
 
         #fileList {
             list-style: none;
             margin: 12px 0 0;
             padding: 0;
-            text-align: left
+            text-align: left;
         }
 
             #fileList li {
@@ -174,7 +215,7 @@
                 padding: 8px 12px;
                 border: 1px dashed var(--border);
                 border-radius: 10px;
-                background: #fff
+                background: #fff;
             }
 
         .remove {
@@ -186,27 +227,26 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            justify-content: center
+            justify-content: center;
         }
 
         .file-link {
             color: var(--blue2);
             font-weight: 600;
-            text-decoration: none
+            text-decoration: none;
         }
 
             .file-link:hover {
-                text-decoration: underline
+                text-decoration: underline;
             }
 
-        /* Toast xanh + icon ✓, tự tắt 1 giây */
         .toast-center {
             position: fixed;
             inset: 0;
             display: grid;
             place-items: center;
             z-index: 9999;
-            pointer-events: none
+            pointer-events: none;
         }
 
         .toast-card {
@@ -221,7 +261,7 @@
             display: grid;
             grid-template-columns: 56px 1fr;
             gap: 14px;
-            box-shadow: 0 18px 60px rgba(37,99,235,.35)
+            box-shadow: 0 18px 60px rgba(37,99,235,.35);
         }
 
         .toast-icon-v {
@@ -234,29 +274,28 @@
             color: #fff;
             font-weight: 900;
             font-size: 28px;
-            box-shadow: 0 8px 22px rgba(16,185,129,.45)
+            box-shadow: 0 8px 22px rgba(16,185,129,.45);
         }
 
         .toast-text {
-            font-weight: 700
+            font-weight: 700;
         }
 
         @@media (max-width:1200px) {
             .form-grid {
-                grid-template-columns: repeat(2,minmax(220px,1fr))
+                grid-template-columns: repeat(2,minmax(220px,1fr));
             }
         }
 
         @@media (max-width:920px) {
             .form-grid {
-                grid-template-columns: 1fr
+                grid-template-columns: 1fr;
             }
         }
     </style>
 }
 
-<div class="page page--scroll">
-    @* Toast sau khi Save/Submit (✓ Saved successfully, auto 1s) *@
+<div class="page">
     @if (TempData["flash_ok"] != null)
     {
         <div id="flashToast" class="toast-center" role="status" aria-live="polite">
@@ -270,11 +309,32 @@
     @using (Html.BeginForm("CreateNewRequest", "ChangeRequest", FormMethod.Post, new { id = "frmCreate", enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.requestid)
+        <input type="hidden" id="statusVal" value="@status" />
+        <input type="hidden" id="editMode" value="0" />
 
         <div class="top-actions">
             <button class="btn btn-outline" type="button" onclick="history.back()">Cancel</button>
-            <button type="submit" name="actionType" value="Save" class="btn btn-primary">Save</button>
-            <button type="submit" name="actionType" value="Submit" class="btn btn-success">Send Request</button>
+
+            @if (isNew)
+            {
+                <button type="submit" name="actionType" value="Save" class="btn btn-primary">Save</button>
+                <button type="submit" name="actionType" value="Submit" class="btn btn-success">Submit</button>
+            }
+            else
+            {
+                if (status == 1)
+                {
+                    <button type="button" id="btnEdit" class="btn btn-outline">Edit</button>
+                    <button type="submit" id="btnSaveAgain" name="actionType" value="SaveAgain" class="btn btn-primary" style="display:none;">Save</button>
+                    <button type="submit" name="actionType" value="Submit" class="btn btn-success">Submit</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary btn-disabled" disabled>Save</button>
+                    <button type="submit" name="actionType" value="Submit" class="btn btn-success">Submit</button>
+                }
+            }
         </div>
 
         <div class="content-grid">
@@ -282,29 +342,33 @@
                 <div class="card">
                     <h2 class="card-title">Request Information</h2>
                     @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-                    @Html.HiddenFor(m => m.requestid)
 
-                    <div class="form-grid">
-                        <div class="form-group"><label>Category</label>@Html.TextBoxFor(m => m.category_nm, new { @class = "form-control" })</div>
-                        <div class="form-group"><label>Document Code</label>@Html.TextBoxFor(m => m.DocumentCode, new { @class = "form-control" })</div>
-                        <div class="form-group"><label>Version</label>@Html.TextBoxFor(m => m.version, new { @class = "form-control" })</div>
+                    @{
+                        // ✅ helper trả object khác nhau để KHÔNG có key readonly khi mở
+                        Func<bool, object> ro = locked =>
+                            locked
+                            ? (object)new { @class = "form-control", @readonly = "readonly" }
+                            : (object)new { @class = "form-control" };
+                    }
 
-                        <div class="form-group full"><label>Change Title</label>@Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control" })</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Category</label>@Html.TextBoxFor(m => m.category_nm, ro(isLocked))</div>
+                    <div class="form-group"><label>Document Code</label>@Html.TextBoxFor(m => m.DocumentCode, ro(isLocked))</div>
+                    <div class="form-group"><label>Version</label>@Html.TextBoxFor(m => m.version, ro(isLocked))</div>
+                    <div class="form-group full"><label>Change Title</label>@Html.TextBoxFor(m => m.ChangeTitle, ro(isLocked))</div>
+                    <div class="form-group"><label>Model</label>@Html.TextBoxFor(m => m.Model, ro(isLocked))</div>
 
-                        <div class="form-group"><label>Model</label>@Html.TextBoxFor(m => m.Model, new { @class = "form-control" })</div>
+                    <div class="form-group"><label>Department group</label>@Html.TextBoxFor(m => m.group_dept, new { @class = "form-control", @readonly = "readonly" })</div>
 
-                        @* Department group: tự từ Session & khóa *@
-                        <div class="form-group">
-                            <label>Department group</label>
-                            @Html.TextBoxFor(m => m.group_dept, new { @class = "form-control", @readonly = "readonly" })
-                        </div>
+                    <div class="form-group"><label>Department group</label>@Html.TextBoxFor(m => m.dep_nm, new { @class = "form-control", @readonly = "readonly" })</div>
+                    <div class="form-group"><label>Department group</label>@Html.TextBoxFor(m => m.factory, new { @class = "form-control", @readonly = "readonly" })</div>
 
-                        @* Khoá 2 trường nhưng không làm nhạt *@
-                        <div class="form-group"><label>Requester</label>@Html.TextBoxFor(m => m.pms_i_usr, new { @class = "form-control", @readonly = "readonly" })</div>
-                        <div class="form-group"><label>Request date</label>@Html.TextBoxFor(m => m.pms_i_ymd, new { @class = "form-control", @readonly = "readonly" })</div>
 
-                        <div class="form-group full"><label>Description</label>@Html.TextBoxFor(m => m.Request_detail, new { @class = "form-control" })</div>
-                    </div>
+                    <div class="form-group"><label>Requester</label>@Html.TextBoxFor(m => m.pms_i_usr, new { @class = "form-control", @readonly = "readonly" })</div>
+                    <div class="form-group"><label>Request date</label>@Html.TextBoxFor(m => m.pms_i_ymd, new { @class = "form-control", @readonly = "readonly" })</div>
+
+                    <div class="form-group full"><label>Description</label>@Html.TextBoxFor(m => m.Request_detail, ro(isLocked))</div>
+                </div>
                 </div>
 
                 <div class="card">
@@ -332,72 +396,107 @@
                     }
                     else
                     {
-                        <div style="margin-bottom:8px; color:#64748b">No existing files yet. Upload using the area below.</div>
+                        <div style="margin-bottom:8px; color:#64748b">No existing files yet.</div>
                     }
 
-                    <div class="dropzone" id="dz" tabindex="0" aria-label="Drag & drop files or click to select">
+                    <div class="dropzone @(isLocked ? "disabled" : "")" id="dz" tabindex="0">
                         <div>Drag & drop files here or choose files to upload.</div>
                         <div style="margin-top:10px">
                             <input type="file" id="fileInput" name="Files" multiple style="display:none" />
-                            <button type="button" class="btn btn-outline" id="btnPick">Choose files…</button>
+                            <!-- ✅ disabled dùng Raw string; KHÔNG dùng anonymous object -->
+                            <button type="button" class="btn btn-outline" id="btnPick" @Html.Raw(isLocked ? "disabled=\"disabled\"" : "")>Choose files…</button>
                         </div>
                         <ul id="fileList" aria-live="polite"></ul>
-                        <small class="hint">Bạn có thể xoá khỏi danh sách trước khi lưu bằng nút thùng rác.</small>
+                        <small class="hint">You can remove from the list before saving.</small>
                     </div>
                 </div>
-
-                @* Bỏ nút Save dưới cùng để tránh trùng *@
             </section>
         </div>
     }
 </div>
 
-@section Scripts {
-    <script>
-        // Toast: auto close sau 1 giây, click để tắt ngay
-        (function () {
-            const t = document.getElementById('flashToast');
-            if (!t) return;
-            const close = () => t.style.display = 'none';
-            t.addEventListener('click', close);
-            setTimeout(close, 1000);
-        })();
 
-        // Dropzone + remove (buffer -> DataTransfer)
-        (function () {
-            const form = document.getElementById('frmCreate');
-            const dz = document.getElementById('dz');
-            const fileInput = document.getElementById('fileInput');
-            const btnPick = document.getElementById('btnPick');
-            const list = document.getElementById('fileList');
+    @section Scripts {
+        <script>
+            // toast auto close (giữ nguyên nếu bạn đã có)
+            (function () {
+                const t = document.getElementById('flashToast');
+                if (!t) return;
+                const close = () => t.style.display = 'none';
+                t.addEventListener('click', close);
+                setTimeout(close, 1000);
+            })();
 
-            const filesBuf = [];
-            btnPick.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', () => { push(fileInput.files); fileInput.value = ''; render(); });
+            // === Edit mode: ẩn "Cancel edit" — sau khi bật Edit, giấu luôn nút Edit ===
+            (function () {
+                var statusVal = parseInt(document.getElementById('statusVal').value || '0', 10);
+                if (statusVal !== 1) return; // chỉ áp dụng cho draft
 
-            ['dragenter', 'dragover'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.add('dragover'); }));
-            ['dragleave', 'drop'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
-            dz.addEventListener('drop', e => { push(e.dataTransfer.files); render(); });
+                var btnEdit = document.getElementById('btnEdit');
+                var btnSaveAgain = document.getElementById('btnSaveAgain');
+                var dz = document.getElementById('dz');
+                var btnPick = document.getElementById('btnPick');
 
-            function push(files) { if (!files) return; for (const f of files) filesBuf.push(f); }
+                function setEditable(on) {
+                    // Bỏ readonly tất cả .form-control trừ 3 field hệ thống
+                    document.querySelectorAll('.form-control').forEach(function (el) {
+                        if (el.id === 'group_dept' || el.id === 'pms_i_usr' || el.id === 'pms_i_ymd') {
+                            el.setAttribute('readonly', 'readonly');
+                            return;
+                        }
+                        if (on) el.removeAttribute('readonly'); else el.setAttribute('readonly', 'readonly');
+                    });
+                    if (on) { dz.classList.remove('disabled'); btnPick && btnPick.removeAttribute('disabled'); }
+                    else { dz.classList.add('disabled'); btnPick && btnPick.setAttribute('disabled', 'disabled'); }
+                }
 
-            function render() {
-                list.innerHTML = '';
-                filesBuf.forEach((f, i) => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<div class="file-info"><strong>${f.name}</strong><div style="font-size:12px;color:#64748b">${(f.size / 1024).toFixed(1)} KB</div></div>`;
-                    const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'remove'; rm.title = 'Remove';
-                    rm.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
-                    rm.addEventListener('click', () => { filesBuf.splice(i, 1); render(); });
-                    li.appendChild(rm); list.appendChild(li);
+                if (btnEdit) {
+                    btnEdit.addEventListener('click', function () {
+                        // Bật edit: KHÔNG đổi text sang "Cancel edit", chỉ ẩn nút
+                        setEditable(true);
+                        if (btnSaveAgain) btnSaveAgain.style.display = '';
+                        btnEdit.style.display = 'none';          // 👈 ẩn nút Edit để không thấy "Cancel edit"
+                    });
+                }
+            })();
+
+            // dropzone (giữ nguyên nếu bạn đã có)
+            (function () {
+                const form = document.getElementById('frmCreate');
+                const dz = document.getElementById('dz');
+                const fileInput = document.getElementById('fileInput');
+                const btnPick = document.getElementById('btnPick');
+                const list = document.getElementById('fileList');
+                if (!dz) return;
+                const filesBuf = [];
+
+                btnPick && btnPick.addEventListener('click', () => fileInput.click());
+                fileInput && fileInput.addEventListener('change', () => { push(fileInput.files); fileInput.value = ''; render(); });
+
+                ['dragenter', 'dragover'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+                ['dragleave', 'drop'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+                dz.addEventListener('drop', e => { if (dz.classList.contains('disabled')) return; push(e.dataTransfer.files); render(); });
+
+                function push(files) { if (!files) return; for (const f of files) filesBuf.push(f); }
+                function render() {
+                    list.innerHTML = '';
+                    filesBuf.forEach((f, i) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<div class="file-info"><strong>${f.name}</strong><div style="font-size:12px;color:#64748b">${(f.size / 1024).toFixed(1)} KB</div></div>`;
+                        const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'remove'; rm.title = 'Remove';
+                        rm.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+                        rm.addEventListener('click', () => { filesBuf.splice(i, 1); render(); });
+                        li.appendChild(rm); list.appendChild(li);
+                    });
+                }
+
+                form.addEventListener('submit', () => {
+                    const dt = new DataTransfer();
+                    filesBuf.forEach(f => dt.items.add(f));
+                    if (fileInput) fileInput.files = dt.files;
                 });
-            }
+            })();
+        </script>
+    }
 
-            form.addEventListener('submit', () => {
-                const dt = new DataTransfer();
-                filesBuf.forEach(f => dt.items.add(f));
-                fileInput.files = dt.files;
-            });
-        })();
-    </script>
-}
+

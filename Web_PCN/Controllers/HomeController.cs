@@ -22,7 +22,7 @@ namespace Web_PCN.Controllers
                 }
 
                 u = Session["UserName"] as string;
-                return string.IsNullOrWhiteSpace(u) ? "V5030587" : u; // default
+                return string.IsNullOrWhiteSpace(u) ? "V4050021" : u; // default
             }
         }
 

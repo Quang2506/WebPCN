@@ -9,6 +9,7 @@ using Web_PCN.Models.ViewModels;
 
 namespace Web_PCN.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
@@ -58,7 +59,10 @@ namespace Web_PCN.Controllers
                 Session["Dept"] = rs.dep_c;
                 Session["GroupDept"] = rs.group_dept;
                 Session["Permit"] = rs.permit?.ToString();
-                Session["Role"] = rs.RoleName;       // có thể null nếu SP không trả
+                Session["Role"] = rs.RoleName;
+                Session["Site"] = rs.site;
+                Session["Dep_nm"] = rs.dep_nm;
+                Session["Factory"] = rs.factory;
 
                 // ==== Đánh dấu đã đăng nhập (cookie xác thực) ====
                 FormsAuthentication.SetAuthCookie(rs.User_id, vm.RememberMe);
@@ -84,7 +88,7 @@ namespace Web_PCN.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Logout()
         {
             // Xoá cookie xác thực + session

@@ -115,8 +115,8 @@
     for(let i=0;i<pieces;i++){
       const p = document.createElement('i');
       const left = Math.random()*100;               // %
-      const delay = Math.random()*500;              // ms (trễ hơn)
-      const dur = 1400 + Math.random()*1400;        // 1.4s - 2.8s (lâu hơn)
+      const delay = Math.random()*200;              // ms (trễ hơn)
+      const dur = 400 + Math.random()*400;        // 1.4s - 2.8s (lâu hơn)
       p.style.left = left + '%';
       p.style.top = (-Math.random()*80) + 'px';
       p.style.background = colors[i % colors.length];
@@ -130,6 +130,6 @@
   // ---- Redirect after longer delay
   setTimeout(function(){
     window.location.href = '@next';
-  }, 3200); // 3.2 giây
+  }, 500); // 3.2 giây
     </script>
 }

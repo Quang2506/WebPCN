@@ -1,0 +1,72 @@
+﻿@model IEnumerable<Core.Dtos.ChangeRequests>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Lấy breadcrumb (đã set ở controller)
+    var parent = (Session["MenuParentName"] as string) ?? "";
+    var child = (Session["MenuChildName"] as string) ?? "";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2>@ViewBag.HeaderName</h2>
+        @*<strong>Pending request</strong>*@
+        @*<div class="pull-right">
+                <a class="btn btn-primary btn-xs"
+                   href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
+                    Create new request
+                </a>
+                <a class="btn btn-default btn-xs"
+                   href="@Url.Action("Query", "Page", new { p = parent, c = child })">
+                    Query
+                </a>
+            </div>*@
+        <div class="clearfix"></div>
+    </div>
+
+    <div class="panel-body">
+
+
+        @if (Model?.Any() == true)
+        {
+            <table class="table table-bordered table-hover table-condensed">
+                <thead>
+                    <tr class="info">
+                        <th style="width:160px;">DocumentCode</th>
+                        <th style="width:90px;">Version</th>
+                        <th style="width:90px;">Model</th>
+                        <th>Change title</th>
+                        <th style="width:150px;">Department</th>
+                        <th style="width:150px;">Factory</th>
+                        <th style="width:150px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("ViewMyChangeRequest","ChangeRequest",new { requestid = r.requestid })">
+                                    @r.DocumentCode
+                                </a>
+                                @*<a>#@r.DocumentCode</a>*@
+                            </td>
+                            <td>@r.version</td>
+                            <td>@r.Model</td>
+                            <td class="text-danger">@r.ChangeTitle</td>
+                            <td>@r.dep_nm</td>
+                            <td>@r.factory</td>
+                            <td class="text-danger">@r.status_nm</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-muted">No data.</div>
+        }
+    </div>
+</div>
+

@@ -142,7 +142,8 @@ namespace Services
                 SyncRate_QSMC = summaries.FirstOrDefault(x => x.Plant == "QSMC")?.SyncRatePercent ?? 0,
                 SyncRate_QMH = summaries.FirstOrDefault(x => x.Plant == "QMH")?.SyncRatePercent ?? 0,
                 NotSynced_QSMC = summaries.FirstOrDefault(x => x.Plant == "QSMC")?.NotSyncedCount ?? 0,
-                NotSynced_QMH = summaries.FirstOrDefault(x => x.Plant == "QMH")?.NotSyncedCount ?? 0
+                NotSynced_QMH = summaries.FirstOrDefault(x => x.Plant == "QMH")?.NotSyncedCount ?? 0,
+                Total         = summaries.FirstOrDefault(x => x.Plant == "QMH")?.Total ?? 0
             };
         }
         private static bool NormalizeDone(string status)
