@@ -1,19 +1,19 @@
 ﻿/* ===== Reset nhẹ & layout gốc ===== */
-html, body {
+/*html, body {
     height: 100%;
 }
 
 .sfc-body {
     background: #0b1320;
-}
+}*/
 
 /* fallback khi chưa load layout */
-.sfc-shell {
+/*.sfc-shell {
     min-height: 100vh;
-}
+}*/
 
 /* Bỏ padding mặc định container-fluid BS3 */
-.no-gutter {
+/*.no-gutter {
     margin-left: 0;
     margin-right: 0;
 }
@@ -21,19 +21,19 @@ html, body {
     .no-gutter > [class*="col-"] {
         padding-left: 0;
         padding-right: 0;
-    }
+    }*/
 
 /* ===== Sidebar ===== */
-.sfc-sidebar {
-    background: #0f172a; /* xanh đen */
-    color: #e5e7eb;
+/*.sfc-sidebar {
+    background: #0f172a;*/ /* xanh đen */
+    /*color: #e5e7eb;
     min-height: 100vh;
     padding: 14px 12px;
     border-right: 1px solid rgba(255,255,255,.08);
-}
+}*/
 
 /* Brand text (thay cho logo) */
-.sfc-brand {
+/*.sfc-brand {
     font-weight: 800;
     letter-spacing: .35em;
     text-align: center;
@@ -43,10 +43,10 @@ html, body {
     padding: 10px 0;
     margin-bottom: 16px;
     user-select: none;
-}
+}*/
 
 /* ===== Menu ===== */
-.sfc-menu {
+/*.sfc-menu {
     margin: 0;
     padding: 4px;
     max-height: calc(100vh - 100px);
@@ -64,10 +64,10 @@ html, body {
 
     .sfc-menu:hover::-webkit-scrollbar-thumb {
         background: rgba(255,255,255,.25);
-    }
+    }*/
 
 /* CHA */
-.sfc-parent > .sfc-parent__link {
+/*.sfc-parent > .sfc-parent__link {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -96,10 +96,10 @@ html, body {
 
 .sfc-parent__link[aria-expanded="true"] .sfc-caret {
     transform: rotate(180deg);
-}
+}*/
 
 /* CON */
-.sfc-submenu {
+/*.sfc-submenu {
     padding-left: 18px;
     background: rgba(255,255,255,.02);
 }
@@ -116,10 +116,10 @@ html, body {
             color: #ffffff;
             background: rgba(255,255,255,.08);
             text-decoration: none;
-        }
+        }*/
 
 /* Active */
-.sfc-menu > li.active > a,
+/*.sfc-menu > li.active > a,
 .sfc-menu > li.active > a:hover,
 .sfc-menu > li.active > a:focus {
     color: #ffffff;
@@ -129,29 +129,29 @@ html, body {
 
 .sfc-menu > li.active .sfc-menu__icon {
     color: #fff;
-}
+}*/
 
 /* ===== TREE LINES: vẽ nét đứt nối menu con ===== */
-.sfc-tree,
+/*.sfc-tree,
 .sfc-tree ul {
     list-style: none !important;
     margin: 0;
     padding-left: 18px;
-}
+}*/
 
     /* mọi item con (li) bên trong submenu */
-    .sfc-tree .sfc-submenu > li {
+    /*.sfc-tree .sfc-submenu > li {
         position: relative;
-    }
+    }*/
 
         /* chính thẻ <a> là nơi vẽ line, để luôn nổi trên nền */
-        .sfc-tree .sfc-submenu > li > a {
+        /*.sfc-tree .sfc-submenu > li > a {
             position: relative;
             display: block;
-        }
+        }*/
 
             /* Sợi dọc */
-            .sfc-tree .sfc-submenu > li > a::before {
+            /*.sfc-tree .sfc-submenu > li > a::before {
                 content: "";
                 position: absolute;
                 left: -14px;
@@ -160,16 +160,16 @@ html, body {
                 width: 0;
                 border-left: 1px dashed rgba(148,163,184,.45);
                 pointer-events: none;
-            }
+            }*/
 
         /* Li cuối: cắt sợi dọc để không “thò” xuống */
-        .sfc-tree .sfc-submenu > li:last-child > a::before {
+        /*.sfc-tree .sfc-submenu > li:last-child > a::before {
             bottom: auto;
             height: 18px;
-        }
+        }*/
 
         /* Sợi ngang nối từ cột dọc vào chữ */
-        .sfc-tree .sfc-submenu > li > a::after {
+        /*.sfc-tree .sfc-submenu > li > a::after {
             content: "";
             position: absolute;
             left: -14px;
@@ -177,12 +177,12 @@ html, body {
             width: 10px;
             border-top: 1px dashed rgba(148,163,184,.45);
             pointer-events: none;
-        }
+        }*/
 
 /* ===== Main area ===== */
-.sfc-main {
-    background: #e9edf3; /* nền xám nhạt */
-    min-height: 100vh;
+/*.sfc-main {
+    background: #e9edf3;*/ /* nền xám nhạt */
+    /*min-height: 100vh;
 }
 
 .sfc-topbar {
@@ -196,10 +196,10 @@ html, body {
     color: #334155;
     font-weight: 600;
     letter-spacing: .02em;
-}
+}*/
 
 /* Content như card */
-.sfc-content {
+/*.sfc-content {
     padding: 24px;
     min-height: calc(100vh - 56px);
 }
@@ -210,25 +210,25 @@ html, body {
         border-radius: 12px;
         box-shadow: 0 10px 30px rgba(31,41,55,.08);
         padding: 20px;
-    }
+    }*/
 
 /* Tiêu đề giữa trang Home */
-.sfc-welcome {
+/*.sfc-welcome {
     text-align: center;
     margin-top: 40px;
     color: #111827;
-}
+}*/
 
 
 /* ===== Userbox góc phải ===== */
-.sfc-userbox {
+/*.sfc-userbox {
     float: right;
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #f3f4f6; /* nền xám nhạt */
-    border-radius: 20px;
+    background: #f3f4f6;*/ /* nền xám nhạt */
+    /*border-radius: 20px;
     border: 1px solid #e5e7eb;
     font-size: 13px;
     font-weight: 500;
@@ -238,42 +238,42 @@ html, body {
 }
 
     .sfc-userbox:hover {
-        background: #e0f2fe; /* xanh nhạt */
-        color: #0369a1;
+        background: #e0f2fe;*/ /* xanh nhạt */
+        /*color: #0369a1;
         border-color: #bae6fd;
     }
 
 .sfc-userbox__icon {
     font-size: 15px;
-    color: #3b82f6; /* xanh dương */
-}
+    color: #3b82f6;*/ /* xanh dương */
+/*}
 
 .sfc-userbox__text {
     white-space: nowrap;
-}
+}*/
 /* ===== User box (avatar + text) ===== */
-.sfc-userbox {
+/*.sfc-userbox {
     float: right;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 6px 12px;
-    background: #f8fafc; /* nền sáng */
-    border: 1px solid #e5e7eb;
-    border-radius: 9999px; /* chip tròn */
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    background: #f8fafc;*/ /* nền sáng */
+    /*border: 1px solid #e5e7eb;
+    border-radius: 9999px;*/ /* chip tròn */
+    /*box-shadow: 0 2px 8px rgba(0,0,0,.04);
     transition: all .2s ease;
     user-select: none;
 }
 
     .sfc-userbox:hover {
-        background: #ecfeff; /* xanh nhạt */
-        border-color: #bae6fd;
+        background: #ecfeff;*/ /* xanh nhạt */
+        /*border-color: #bae6fd;
         box-shadow: 0 6px 16px rgba(2,132,199,.12);
-    }
+    }*/
 
 /* Ảnh avatar tròn */
-.sfc-userbox__avatar {
+/*.sfc-userbox__avatar {
     width: 34px;
     height: 34px;
     border-radius: 50%;
@@ -281,10 +281,10 @@ html, body {
     display: block;
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px rgba(2,132,199,.25);
-}
+}*/
 
 /* Fallback initials khi không có ảnh */
-.sfc-userbox__initials {
+/*.sfc-userbox__initials {
     width: 34px;
     height: 34px;
     border-radius: 50%;
@@ -297,10 +297,10 @@ html, body {
     background: linear-gradient(135deg,#e0f2fe,#bae6fd);
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px rgba(2,132,199,.25);
-}
+}*/
 
 /* Phần chữ */
-.sfc-userbox__text {
+/*.sfc-userbox__text {
     line-height: 1.1;
     display: flex;
     flex-direction: column;
@@ -309,22 +309,22 @@ html, body {
 
 .sfc-userbox__hello {
     font-size: 11px;
-    color: #64748b; /* xám nhạt */
-    letter-spacing: .02em;
+    color: #64748b;*/ /* xám nhạt */
+    /*letter-spacing: .02em;
 }
 
 .sfc-userbox__name {
     font-size: 13px;
     font-weight: 600;
-    color: #0f172a; /* xám đậm */
-    max-width: 180px; /* tránh tràn dài */
-    overflow: hidden;
+    color: #0f172a;*/ /* xám đậm */
+    /*max-width: 180px;*/ /* tránh tràn dài */
+    /*overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
+}*/
 
 /* Tối ưu trên màn nhỏ: gom lại 1 dòng */
-@media (max-width: 992px) {
+/*@media (max-width: 992px) {
     .sfc-userbox__text {
         flex-direction: row;
         gap: 6px;
@@ -338,4 +338,4 @@ html, body {
         font-size: 12px;
         max-width: 120px;
     }
-}
+}*/

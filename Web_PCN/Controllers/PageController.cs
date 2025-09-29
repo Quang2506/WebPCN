@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web.Mvc;
 using Core.Dtos;
@@ -27,14 +28,12 @@ namespace Web_PCN.Controllers
             var MyChangeRequest = _RequestService.MyChangeRequest(user);
             return PartialView("MyChangeRequest", MyChangeRequest);
         }
-        // =====================================================================
-        // ===============        QUERY THEO PLANT + DEPCODE        =============
-        // =====================================================================
-        // GET: mở form, nạp Category, và hiển thị danh sách mặc định theo plant + dep
+
+    
         [HttpGet]
         public ActionResult Query(string plant, string dep)
         {
-            // chuẩn hóa
+      
             var user = (Session["UserName"] as string) ?? "V4050021";
             plant = string.IsNullOrWhiteSpace(plant) ? "QSMC" : plant.ToUpperInvariant();
             dep = (dep ?? string.Empty).Trim();
@@ -43,21 +42,20 @@ namespace Web_PCN.Controllers
             {
                 Plant = plant,
                 DepCode = dep,
-                // breadcrumb chỉ để hiển thị; nếu muốn tra theo menu thì có thể
-                // map dep -> tên menu ở service, nhưng không bắt buộc:
                 ParentName = null,
                 ChildName = null,
                 ParentId = null,
                 ChildId = null
             };
             // Dropdown Category theo dep
-            vm.CategoryList = _page.GetCategoryListByDep(plant, dep);
-            // Danh sách mặc định (giống Pending nhưng theo dep)
+            vm.CategoryList = _page.GetOptionList("category", plant, dep);
+            vm.StatusList = _page.GetOptionList("status", plant, dep);
+
             vm.Results = _page.GetChangeRequestsByDep(plant, dep, user);
             ViewBag.Title = $"[{plant}] {dep} (Query)";
             return View("Query", vm);
         }
-        // POST: lọc lại theo các trường — chỉ Category là dropdown, còn lại là text
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Query(QueryViewModel vm)
@@ -77,7 +75,9 @@ namespace Web_PCN.Controllers
                 vm.Status
             );
             // nạp lại dropdown Category theo dep
-            vm.CategoryList = _page.GetCategoryListByDep(vm.Plant, vm.DepCode);
+            
+            vm.CategoryList = _page.GetOptionList("category", vm.Plant, vm.DepCode);
+            vm.StatusList = _page.GetOptionList("status", vm.Plant, vm.DepCode);
             ViewBag.Title = $"[{vm.Plant}] {vm.DepCode} (Query)";
             return View("Query", vm);
         }

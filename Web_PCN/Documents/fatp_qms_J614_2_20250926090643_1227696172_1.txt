@@ -1,0 +1,458 @@
+
+@* ChangeRequestCreate.cshtml — sticky top with Cancel / Save / Submit for Approval *@
+@model Core.Dtos.ChangeRequests
+
+@{
+    ViewBag.Title = "ChangeRequestCreate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/changerequest.css" />
+    <style>
+        /* =========================
+           QUICK-TUNE VARIABLES
+           ========================= */
+        :root {
+            --card-pad: 12px;
+            --gap-x: 12px;
+            --gap-y: 10px;
+            --field-gap: 6px;
+            --control-h: 40px;
+            --radius: 10px;
+            --textarea-min-h: 120px;
+            --border: #d9dee8;
+        }
+
+        /* ===== Sticky Top Action bar (Cancel / Save / Submit for Approval) ===== */
+        .top-actions {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 8px 0 0;
+        }
+
+        /* Buttons + ripple */
+        .btn {
+            --btn-bg: #f1f4fa;
+            --btn-color: #1f2a37;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-weight: 700;
+            letter-spacing: .2px;
+            background: var(--btn-bg);
+            color: var(--btn-color);
+            cursor: pointer;
+            user-select: none;
+            transition: transform .12s cubic-bezier(.2,.7,.2,1), box-shadow .18s, filter .18s;
+        }
+
+            .btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 20px rgba(31,42,55,.10);
+            }
+
+            .btn:active {
+                transform: translateY(0);
+                box-shadow: 0 4px 12px rgba(31,42,55,.08);
+            }
+
+            .btn::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                transform: scale(0);
+                opacity: 0;
+                pointer-events: none;
+                background: radial-gradient(closest-side, rgba(255,255,255,.45), rgba(255,255,255,0));
+                transition: transform .35s ease, opacity .55s ease;
+            }
+
+            .btn.is-pressed::after {
+                transform: scale(3);
+                opacity: 1;
+            }
+
+        .btn-outline {
+            --btn-bg: #fff;
+            border: 1px solid #d3dbe7;
+        }
+
+        .btn-primary {
+            --btn-bg: linear-gradient(180deg,#3b82f6 0%,#2563eb 100%);
+            --btn-color: #fff;
+        }
+
+        .btn-success {
+            --btn-bg: linear-gradient(180deg,#22c55e 0%,#16a34a 100%);
+            --btn-color: #fff;
+        }
+
+        /* ===== Layout / Cards ===== */
+        .page {
+            max-width: 1220px;
+            margin: 10px auto 0;
+            padding: 0 16px;
+        }
+
+        .page--scroll {
+            height: calc(100vh - 16px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 48px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-top: 6px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: var(--card-pad);
+            box-shadow: 0 4px 14px rgba(31,42,55,.06);
+        }
+
+            .card + .card {
+                margin-top: 10px;
+            }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin: 2px 0 10px;
+        }
+
+        /* ===== Form grid: 3 columns ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(220px,1fr));
+            column-gap: var(--gap-x);
+            row-gap: var(--gap-y);
+            align-items: start;
+        }
+
+            .form-grid .full {
+                grid-column: 1 / -1;
+            }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--field-gap);
+            margin: 0;
+        }
+
+            .form-group label {
+                font-size: 11.5px;
+                color: #6b7788;
+                font-weight: 600;
+                letter-spacing: .1px;
+            }
+
+            .form-group input[type="text"],
+            .form-group input[type="date"],
+            .form-group input[type="number"],
+            .form-group select,
+            .form-control {
+                height: var(--control-h);
+                padding: 0 10px !important;
+                line-height: var(--control-h);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                background: #f7f9fc;
+                color: #1f2a37;
+                transition: background .18s, border-color .18s, box-shadow .18s;
+            }
+
+            .form-group textarea {
+                min-height: var(--textarea-min-h);
+                padding: 8px 10px !important;
+                line-height: 1.45;
+                resize: vertical;
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                background: #f7f9fc;
+                color: #1f2a37;
+            }
+
+                .form-group input::placeholder, .form-group textarea::placeholder {
+                    color: #a7b1bf;
+                }
+
+                .form-group input:hover, .form-group select:hover, .form-group textarea:hover {
+                    background: #fff;
+                    border-color: #cbd3e2;
+                }
+
+                .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+                    outline: none;
+                    background: #fff;
+                    border-color: #2563eb;
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed #cad3e1;
+            border-radius: 12px;
+            padding: 16px;
+            background: linear-gradient(180deg,#fbfdff 0%,#f6f9ff 100%);
+            text-align: center;
+            color: #7c8799;
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+        }
+
+            .dropzone:hover {
+                border-color: #2563eb;
+                box-shadow: 0 4px 14px rgba(31,42,55,.06);
+                transform: translateY(-1px);
+            }
+
+            .dropzone.dragover {
+                border-color: #22c55e;
+                box-shadow: 0 0 0 4px rgba(34,197,94,.14);
+            }
+
+        #fileList {
+            list-style: none;
+            margin: 12px 0 0;
+            padding: 0;
+            text-align: left;
+        }
+
+            #fileList li {
+                display: grid;
+                grid-template-columns: 1fr 40px;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 12px;
+                border: 1px dashed var(--border);
+                border-radius: 10px;
+                background: #fff;
+            }
+
+                #fileList li + li {
+                    margin-top: 8px;
+                }
+
+            #fileList .file-info > strong {
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            #fileList .remove {
+                justify-self: center;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                background: #f7f9ff;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform .12s, box-shadow .18s, background .18s, border-color .18s;
+            }
+
+                #fileList .remove:hover {
+                    background: #fff;
+                    border-color: #cfd6e5;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(31,42,55,.06);
+                }
+
+        @@media (max-width:1200px) {
+            .form-grid {
+                grid-template-columns: repeat(2, minmax(220px,1fr));
+            }
+        }
+
+        @@media (max-width:920px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="page page--scroll">
+    @using (Html.BeginForm("CreateNewRequest", "ChangeRequest", FormMethod.Post, new { @id = "frmCreate" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <!-- Sticky top: Cancel / Save / Submit for Approval -->
+        <div class="top-actions">
+            <button class="btn btn-outline" type="button" onclick="history.back()">Cancel</button>
+            <button class="btn btn-primary" type="submit">Save</button>
+            <button class="btn btn-success" type="button" onclick="submitForApproval()">Submit for Approval</button>
+        </div>
+
+        <div class="content-grid">
+            <section aria-label="Main form">
+                <div class="card">
+                    <h2 class="card-title">Request Information</h2>
+                    <!-- Khối hiện lỗi tổng quát -->
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    <div class="form-grid">
+                        <div class="form-group">
+
+                            <label for="CategoryText">Category</label>
+                            <input name="category" class="form-control" />
+                            @*<input type="text" id="CategoryText" name="CategoryText" />*@
+
+                         
+                           
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="DocCode">Document Code</label>
+                            <input name="DocumentCode" class="form-control" />
+                            @*<input type="text" id="DocCode" name="DocCode" required />*@
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Version">Version</label>
+                            <input name="version" class="form-control" />
+                            @*<input type="text" id="Version" name="Version" />*@
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="ChangeTitle">Change Title</label>
+                            <input name="ChangeTitle" class="form-control" />
+                            @*<input type="text" id="ChangeTitle" name="ChangeTitle" required />*@
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Model">Model</label>
+                            <input name="Model" class="form-control" />
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Priority">Department group</label>
+                            <input name="group_dept" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Requester">Requester</label>
+                            <input name="user" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="RequestDate">Request date</label>
+                            <input name="Request date" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Status">Status</label>
+                            <input name="Status" class="form-control" />
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="Description">Description</label>
+                            <textarea name="Request_detail" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="fileQty" value="1" />
+                <!-- Attachments -->
+                <div class="card">
+                    <div class="card-title">Đính kèm</div>
+                    <div class="dropzone">
+                        Kéo & thả tệp vào đây hoặc chọn tệp để tải lên.
+                        <div style="margin-top:10px">
+                            <input type="file" id="Files" name="Files" multiple />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No footer buttons at the bottom -->
+            </section>
+        </div>
+    }
+
+
+</div>
+
+@section Scripts {
+    <script>
+        // Ripple press visual
+        document.querySelectorAll('.btn').forEach(b => {
+            b.addEventListener('mousedown', () => b.classList.add('is-pressed'));
+            ['mouseup', 'mouseleave', 'blur'].forEach(e => b.addEventListener(e, () => b.classList.remove('is-pressed')));
+        });
+
+        // Submit helper
+        function submitForApproval() { document.getElementById('crForm').requestSubmit(); }
+
+        // Attachments buffer (add/remove one by one)
+        (function () {
+            const dz = document.getElementById('dz');
+            const input = document.getElementById('fileInput');
+            const btnPick = document.getElementById('btnPick');
+            const list = document.getElementById('fileList');
+            const filesBuf = [];
+            const MAX_FILES = 50, MAX_EACH_MB = 50, MAX_TOTAL_MB = 500;
+
+            btnPick.addEventListener('click', () => input.click());
+            input.addEventListener('change', () => { addFiles(input.files); input.value = ''; });
+
+            ['dragenter', 'dragover'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+            ['dragleave', 'drop'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+            dz.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+
+            function addFiles(files) {
+                if (!files || !files.length) return;
+                if (filesBuf.length + files.length > MAX_FILES) { alert(`Maximum ${MAX_FILES} files allowed.`); return; }
+
+                let totalBytes = filesBuf.reduce((s, f) => s + f.size, 0);
+                for (const f of files) {
+                    if (f.size > MAX_EACH_MB * 1024 * 1024) { alert(`"${f.name}" exceeds ${MAX_EACH_MB}MB.`); continue; }
+                    if (totalBytes + f.size > MAX_TOTAL_MB * 1024 * 1024) { alert(`Total size exceeds ${MAX_TOTAL_MB}MB.`); continue; }
+                    filesBuf.push(f); totalBytes += f.size;
+                }
+                sync();
+            }
+
+            function sync() {
+                const dt = new DataTransfer();
+                filesBuf.forEach(f => dt.items.add(f));
+                input.files = dt.files;
+
+                list.innerHTML = '';
+                filesBuf.forEach((f, idx) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<div class="file-info"><strong>${f.name}</strong></div>`;
+                    const rm = document.createElement('button');
+                    rm.className = 'remove'; rm.type = 'button'; rm.title = 'Remove this file';
+                    rm.innerHTML = `
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg" stroke="currentColor"
+                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                          <path d="M10 11v6M14 11v6"/>
+                                        </svg>`;
+
+                    rm.addEventListener('click', () => { filesBuf.splice(idx, 1); sync(); });
+                    li.appendChild(rm); list.appendChild(li);
+                });
+            }
+        })();
+    </script>
+}

@@ -103,11 +103,11 @@ namespace Web_PCN.Controllers
         {
             var m = new Core.Dtos.ChangeRequests
             {
-                site= Session["Site"].ToString(),
-                dep_nm= Session["Dep_nm"].ToString(),
+                site = Session["Site"].ToString(),
+                dep_nm = Session["Dep_nm"].ToString(),
                 factory = Session["Factory"].ToString(),
                 pms_i_usr = GetCurrentUser(),
-                pms_i_ymd = DateTime.Now.ToString("yyyyMMddHHmmss"),
+                pms_i_ymd = DateTime.Now.ToString("yyyy-MM-dd HH:mm:s"),
                 group_dept = GetGroupDept()
             };
             ViewBag.AttFiles = new List<KeyValuePair<string, string>>();
@@ -127,20 +127,28 @@ namespace Web_PCN.Controllers
             var fileList = Files?.Where(f => f != null && f.ContentLength > 0).ToList()
                           ?? new List<HttpPostedFileBase>();
             var originalFileNames = fileList.Select(f => Path.GetFileName(f.FileName)).ToList();
-            string jsonFileNames = JsonConvert.SerializeObject(originalFileNames);
+            string jsonFileNames = Newtonsoft.Json.JsonConvert.SerializeObject(originalFileNames);
 
-            // requestId mong muốn (nếu có sẵn khi SaveAgain)
+            // ✅ [sửa editing file] Chuẩn hoá actionType
+            var act = (actionType ?? Request["actionType"] ?? "").Trim();
+            var isNew = string.IsNullOrWhiteSpace(vm.requestid);
+            if (string.IsNullOrEmpty(act))
+                act = isNew ? "Save" : "SaveAgain";
+
             var requestId = vm.requestid;
 
-            // ===== SAVE (tạo mới) =====
-            if (actionType.Equals("Save", StringComparison.OrdinalIgnoreCase))
+            // ====================== SAVE (CREATE) ======================
+            if (act.Equals("Save", StringComparison.OrdinalIgnoreCase))
             {
-                // Nếu chưa có requestid -> buộc phải có file đính kèm tối thiểu 1
-                if (string.IsNullOrWhiteSpace(vm.requestid) && originalFileNames.Count == 0)
+                System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][Save] user={0} req={1} files={2}",
+                    vm.pms_i_usr, vm.requestid ?? "(new)", originalFileNames.Count);
+
+                // Tạo mới phải có ít nhất 1 file
+                if (isNew && originalFileNames.Count == 0)
                 {
                     ModelState.AddModelError("", "Please add the attached file.");
                     ViewBag.AttFiles = new List<KeyValuePair<string, string>>();
-                    ViewBag.Status = 1; // mở khoá lại cho View nhập tiếp
+                    ViewBag.Status = 1;
                     return View("ChangeRequestCreate", vm);
                 }
 
@@ -150,50 +158,70 @@ namespace Web_PCN.Controllers
 
                 if (create == null || !string.Equals(create.iResult, "OK", StringComparison.OrdinalIgnoreCase))
                 {
+                    System.Diagnostics.Trace.TraceWarning("[CreateNewRequest][Save] FAIL: {0}", create?.iMessage);
                     ModelState.AddModelError(string.Empty, create?.iMessage ?? "Tạo mới thất bại.");
                     ViewBag.AttFiles = new List<KeyValuePair<string, string>>();
                     ViewBag.Status = 1;
                     return View("ChangeRequestCreate", vm);
                 }
 
-                requestId = !string.IsNullOrEmpty(create.RequestId) ? create.RequestId : requestId;
-
-                // Lưu file vật lý (tăng index tiếp theo)
-                SaveUploadedFilesToDisk(requestId, fileList);
-
-                // Lưu danh sách file vừa lưu vào TempData để Edit hợp nhất hiển thị
-                var justSaved = fileList.Select((f, i) =>
+                requestId = create.RequestId;
+                if (string.IsNullOrWhiteSpace(requestId))
                 {
-                    var ext = Path.GetExtension(f.FileName);
-                    return $"{requestId}_{i + 1}{ext}";
-                }).ToList();
-                TempData["SavedFiles"] = justSaved;
-
-                TempData["flash_ok"] = true;
-                TempData["flash_msg"] = "Saved successfully.";
-                return RedirectToAction(nameof(Edit), new { requestid = requestId });
-            }
-
-            // ===== SAVE AGAIN (chỉnh sửa bản nháp) =====
-            if (actionType.Equals("SaveAgain", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(vm.requestid))
-            {
-                var detail = _RequestService.ViewRequest(vm.requestid);
-                if (detail == null)
-                {
-                    ModelState.AddModelError("", "Request not found.");
-                    ViewBag.Status = 0;
+                    ModelState.AddModelError(string.Empty, "Tạo mới thất bại (không nhận được RequestId).");
+                    ViewBag.Status = 1;
                     return View("ChangeRequestCreate", vm);
                 }
 
-                // Đọc status trực tiếp từ DB để khoá/sửa
+                // Ghi file vật lý theo {requestId}_{rn}{ext}
+                try
+                {
+                    var docs = Server.MapPath("~/Documents");
+                    Directory.CreateDirectory(docs);
+
+                    for (int i = 0; i < fileList.Count; i++)
+                    {
+                        var f = fileList[i];
+                        var ext = Path.GetExtension(f.FileName) ?? "";
+                        var targetName = $"{requestId}_{i + 1}{ext}";
+                        var dest = Path.Combine(docs, targetName);
+
+                        var tmp = Path.Combine(docs, Guid.NewGuid().ToString("N") + ext);
+                        f.SaveAs(tmp);
+                        if (System.IO.File.Exists(dest)) System.IO.File.Delete(dest);
+                        System.IO.File.Move(tmp, dest);
+                    }
+                    System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][Save] wrote {0} files", fileList.Count);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning("[CreateNewRequest][Save] write files WARN: {0}", ex.Message);
+                }
+
+                TempData["SavedFiles"] = fileList.Select((f, i) => $"{requestId}_{i + 1}{Path.GetExtension(f.FileName)}").ToList();
+                TempData["flash_ok"] = true;
+                TempData["flash_msg"] = "Saved successfully.";
+                System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][Save] OK requestId={0}", requestId);
+                return RedirectToAction(nameof(Edit), new { requestid = requestId });
+            }
+
+            // ====================== SAVE AGAIN (UPDATE + SYNC FILES) ======================
+            if (act.Equals("SaveAgain", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(vm.requestid))
+            {
+                System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][SaveAgain] user={0} req={1} files={2}",
+                    vm.pms_i_usr, vm.requestid, originalFileNames.Count);
+
+                // Kiểm tra tồn tại + trạng thái draft
                 var status = _RequestService.GetRequestStatus(vm.requestid) ?? 0;
                 if (status != 1)
                 {
                     ModelState.AddModelError("", "Editing is locked by status.");
-                    ViewBag.Status = status; // để View khoá input
-                    return View("ChangeRequestCreate", detail);
+                    ViewBag.Status = status;
+                    var detail = _RequestService.ViewRequest(vm.requestid);
+                    return View("ChangeRequestCreate", detail ?? vm);
                 }
 
+                // Gọi SP UPDATE: đã tích hợp đồng bộ file theo JSON (xoá khác, thêm thiếu)
                 var update = _RequestService.UpdateRequestViaCreateSp(
                     vm.requestid,
                     vm.category_nm, vm.ChangeTitle, vm.Model, vm.DocumentCode, vm.version,
@@ -203,41 +231,69 @@ namespace Web_PCN.Controllers
 
                 if (update == null || !string.Equals(update.iResult, "OK", StringComparison.OrdinalIgnoreCase))
                 {
+                    System.Diagnostics.Trace.TraceWarning("[CreateNewRequest][SaveAgain] FAIL: {0}", update?.iMessage);
                     ModelState.AddModelError("", update?.iMessage ?? "Update failed.");
                     ViewBag.Status = status;
                     return View("ChangeRequestCreate", vm);
                 }
 
-                SaveUploadedFilesToDisk(vm.requestid, fileList);
+                // Ghi các file upload mới theo {requestId}_{rn}{ext} (rn theo thứ tự fileList)
+                try
+                {
+                    var docs = Server.MapPath("~/Documents");
+                    Directory.CreateDirectory(docs);
+
+                    for (int i = 0; i < fileList.Count; i++)
+                    {
+                        var f = fileList[i];
+                        var ext = Path.GetExtension(f.FileName) ?? "";
+                        var targetName = $"{vm.requestid}_{i + 1}{ext}";
+                        var dest = Path.Combine(docs, targetName);
+
+                        var tmp = Path.Combine(docs, Guid.NewGuid().ToString("N") + ext);
+                        f.SaveAs(tmp);
+                        if (System.IO.File.Exists(dest)) System.IO.File.Delete(dest);
+                        System.IO.File.Move(tmp, dest);
+                    }
+                    System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][SaveAgain] wrote {0} files", fileList.Count);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning("[CreateNewRequest][SaveAgain] write files WARN: {0}", ex.Message);
+                }
 
                 TempData["flash_ok"] = true;
                 TempData["flash_msg"] = "Saved again.";
                 return RedirectToAction(nameof(Edit), new { requestid = vm.requestid });
             }
 
-            // ===== SUBMIT =====
-            if (actionType.Equals("Submit", StringComparison.OrdinalIgnoreCase))
+            // ====================== SUBMIT ======================
+            if (act.Equals("Submit", StringComparison.OrdinalIgnoreCase))
             {
-                // Theo bản ổn định: gửi dep_c rỗng khi sendRequest
+                System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][Submit] user={0} req={1}", vm.pms_i_usr, requestId ?? "(n/a)");
+
                 var submit = _RequestService.ProcessAction(requestId, vm.group_dept, "sendRequest", vm.pms_i_usr);
                 if (submit == null || !string.Equals(submit.iResult, "OK", StringComparison.OrdinalIgnoreCase))
                 {
+                    System.Diagnostics.Trace.TraceWarning("[CreateNewRequest][Submit] FAIL: {0}", submit?.iMessage);
                     ModelState.AddModelError(string.Empty, submit?.iMessage ?? "Submit không thành công.");
                     ViewBag.AttFiles = new List<KeyValuePair<string, string>>();
                     vm.requestid = requestId;
-                    ViewBag.Status = _RequestService.GetRequestStatus(requestId) ?? 0; // để View phản ánh trạng thái
+                    ViewBag.Status = _RequestService.GetRequestStatus(requestId) ?? 0;
                     return View("ChangeRequestCreate", vm);
                 }
 
                 TempData["flash_ok"] = true;
                 TempData["flash_msg"] = "Submitted for approval successfully.";
+                System.Diagnostics.Trace.TraceInformation("[CreateNewRequest][Submit] OK req={0}", requestId);
                 return RedirectToAction(nameof(Edit), new { requestid = requestId });
             }
 
-            // ===== Mặc định: thao tác không hợp lệ =====
+            // ====== Mặc định: thao tác không hợp lệ ======
             ModelState.AddModelError(string.Empty, "Thao tác không hợp lệ.");
             ViewBag.AttFiles = new List<KeyValuePair<string, string>>();
-            ViewBag.Status = string.IsNullOrWhiteSpace(vm.requestid) ? 1 : (_RequestService.GetRequestStatus(vm.requestid) ?? 0);
+            ViewBag.Status = isNew ? 1 : (_RequestService.GetRequestStatus(vm.requestid) ?? 0);
+            System.Diagnostics.Trace.TraceWarning("[CreateNewRequest] Invalid actionType={0}", actionType);
             return View("ChangeRequestCreate", vm);
         }
 
@@ -255,7 +311,7 @@ namespace Web_PCN.Controllers
                     dep_nm = Session["Dep_nm"].ToString(),
                     factory = Session["Factory"].ToString(),
                     pms_i_usr = GetCurrentUser(),
-                    pms_i_ymd = DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    pms_i_ymd = DateTime.Now.ToString("yyyy-MM-dd HH:mm:s"),
                     group_dept = GetGroupDept()
                 };
                 ViewBag.AttFiles = new List<KeyValuePair<string, string>>();
@@ -340,7 +396,7 @@ namespace Web_PCN.Controllers
                 return;
 
             // Ưu tiên cấu hình FileBaseDir, fallback ~/Documents
-            var uploadRoot =  Server.MapPath("~/Documents");
+            var uploadRoot = Server.MapPath("~/Documents");
 
             // Đảm bảo thư mục tồn tại
             Directory.CreateDirectory(uploadRoot);
@@ -426,7 +482,7 @@ namespace Web_PCN.Controllers
             }
 
             // Ưu tiên FileBaseDir, fallback ~/Documents
-            var baseDir =  Server.MapPath("~/Documents");
+            var baseDir = Server.MapPath("~/Documents");
             var full = Path.Combine(baseDir, decodedName);
             if (!System.IO.File.Exists(full))
             {
@@ -479,5 +535,48 @@ namespace Web_PCN.Controllers
 
             return RedirectToAction("ChangeRequestDetail", new { requestid = requestId, dep_c });
         }
+
+
+        // ================================ DELETE (gọi SP _PCN_CreateNewRequest @Action='DELETE') ================================
+        [HttpGet, Route("Delete")]
+        public ActionResult Delete(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                TempData["Error"] = "Invalid request id.";
+                return RedirectToAction(nameof(ChangeRequestCreate));
+            }
+
+            // (có thể bỏ pre-check; SP vẫn kiểm tra status==1)
+            var st = _RequestService.GetRequestStatus(id) ?? 0;
+            if (st != 1)
+            {
+                TempData["Error"] = "Only draft can be deleted.";
+                return RedirectToAction(nameof(Edit), new { requestid = id });
+            }
+
+            var res = _RequestService.DeleteViaCreateSp(id, GetCurrentUser());
+            if (!string.Equals(res?.iResult, "OK", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = res?.iMessage ?? "Delete failed.";
+                return RedirectToAction(nameof(Edit), new { requestid = id });
+            }
+
+            // Xoá file vật lý sau khi DB xoá thành công
+            try
+            {
+                var dir = Server.MapPath("~/Documents");
+                if (Directory.Exists(dir))
+                {
+                    foreach (var p in Directory.EnumerateFiles(dir, id + "_*.*", SearchOption.TopDirectoryOnly))
+                        System.IO.File.Delete(p);
+                }
+            }
+            catch { /* ignore IO errors */ }
+
+            TempData["Success"] = "Deleted successfully.";
+            return RedirectToAction(nameof(ChangeRequestCreate));
+        }
+
     }
 }

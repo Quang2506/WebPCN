@@ -16,8 +16,12 @@ namespace Core.Dtos
         public string DocumentCode { get; set; }   // text nhập tay
         public string ChangeTitle { get; set; }    // text nhập tay
         public string Status { get; set; }         // text nhập tay
-                                                   // ===== Nguồn cho dropdown =====
+
+     
+        // ===== Nguồn cho dropdown =====
         public IEnumerable<SelectListItem> CategoryList { get; set; }
+        public IEnumerable<SelectListItem> StatusList { get; set; }
+
         // ===== Kết quả =====
         public IEnumerable<ChangeRequestDto> Results { get; set; }
     }

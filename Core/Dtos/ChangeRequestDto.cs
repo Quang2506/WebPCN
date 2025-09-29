@@ -14,6 +14,8 @@ namespace Core.Dtos
         public string DepGroup { get; set; }   // map dep_group
         public string RequestID { get; set; }  // map RequestID
         public string TransDateTime { get; set; }
+        public string Model { get; set; }
+        public string Factory { get; set; }
 
     }
 

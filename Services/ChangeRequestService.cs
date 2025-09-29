@@ -1,6 +1,7 @@
 ﻿using Core.Dtos;
 using Data.Repositories;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Services
 {
@@ -65,5 +66,11 @@ namespace Services
         // Lấy trạng thái hiện tại (để controller không cần dựa vào DTO.status)
         public int? GetRequestStatus(string requestid)
             => _repo.GetRequestStatus(requestid);
+
+        public ReturnMessageResult DeleteViaCreateSp(string requestid, string user)
+    => _repo.DeleteViaCreateSp(requestid, user);
+
+
+
     }
 }

@@ -15,12 +15,83 @@
 
     @RenderSection("Styles", required: false)
 </head>
+
+
+<style>
+    body {
+        height: 100vh;
+        overflow: hidden
+    }
+
+    .min-vh-100 {
+        min-height: 89vh !important;
+    }
+
+
+    .header {
+        background-color: #8ecad4;
+        color: white;
+        padding: 0 20px; /* Giảm padding dọc để kiểm soát chiều cao chính xác */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+        flex-shrink: 0; /* Không cho header co lại */
+    }
+
+    .logo-title {
+        display: flex;
+        align-items: center;
+    }
+
+    .logo {
+        height: 40px; /* Điều chỉnh logo nhỏ hơn một chút */
+        margin-right: 15px;
+    }
+
+    .header h1 {
+        font-size: 24px; /* Giảm kích thước font một chút */
+        margin: 0;
+        font-weight: bold;
+    }
+
+    .footer-bar {
+        height: 50px;
+        background: #8ecad4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #F9F9F9;
+        flex-shrink: 0; /* Không cho footer co lại */
+    }
+</style>
+
+
+
 <body class="bg-light">
+    <!--<div class="header">
+    <div class="logo-title">
+    <img class="logo" src="~/Content/images/quanta_logo.png" alt="Logo" />
+    <h1>
+
+                    Process Change Notice
+
+                </h1>
+    </div>-->
+    @*<div class="nav-links">
+        <a href="@Url.Action("MyApproval", "Page")">My Tasks</a><span class="sep">|</span>
+        <a href="@Url.Action("MyChangeRequest", "Page")">My change request</a><span class="sep">|</span>
+        <a href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">Create change request</a><span class="sep">|</span>
+        <span class="id"> <a href="@Url.Action("Logout", "Account")" class="pcn-logout-link" title="Logout"> @Session["UserName"]</a></span>
+        </div>*@
+    </div>
     <!-- Sprite icon nội bộ (offline) -->
     @Html.Partial("~/Views/Shared/_IconsSprite.cshtml")
 
     @RenderBody()
 
+    @*<div class="footer-bar">Copyright QMH QMS</div>*@
     <!-- Bootstrap 5 JS bundle (LOCAL) -->
     <script src="~/Scripts/bootstrap3/bootstrap.bundle.min.js"></script>
     @RenderSection("scripts", required: false)

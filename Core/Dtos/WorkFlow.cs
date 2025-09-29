@@ -12,7 +12,8 @@ namespace Core.Dtos
         public string Dep_c { get; set; }             // Phòng ban
         public string Status { get; set; }            // Mã trạng thái
         public string Status_nm { get; set; }         // Tên trạng thái
-        public string Confirm_per { get; set; }       // Người xác nhận
+        public string Confirm_per { get; set; }       // Mã ID người xác nhận
+        public string Confirm_per_nm { get; set; }    // Tên người xác nhận
         public DateTime Confirm_dt { get; set; }      // Thời gian xác nhận
     }
 }

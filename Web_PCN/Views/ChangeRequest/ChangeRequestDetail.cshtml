@@ -63,11 +63,14 @@
             }
 
         .page {
-            max-width: 1220px;
-            margin: 10px auto 24px;
-            padding: 0 16px;
-            min-height: 100vh
+            max-width: 100%;
+            /* margin: 10px auto 24px; */
+            /* padding: 0 16px 48px; */
+            /* margin-left: 25px; */
+            width: 79%;
+            padding: 0 !important;
         }
+
 
         .breadcrumb {
             color: #64748b;
@@ -88,7 +91,8 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 14px;
-            margin-top: 14px
+            margin-top: 14px;
+            width:100%
         }
 
         .card {
@@ -96,7 +100,9 @@
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: var(--card-pad);
-            box-shadow: 0 4px 14px rgba(31,42,55,.06)
+            box-shadow: 0 4px 14px rgba(31, 42, 55, .06);
+            width: 96.8%;
+            margin: auto;
         }
 
             .card + .card {
@@ -195,13 +201,13 @@
                 text-decoration: underline
             }
 
-        /* Actions */
         .actions-bar {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin: 12px 0
+            margin: 12px 0;
+            padding-left: 21px;
         }
 
         .action-btn {
@@ -222,8 +228,10 @@
         }
 
             .action-btn:hover {
-                background: var(--primary-600);
-                box-shadow: 0 8px 20px rgba(29,78,216,.22)
+               /* background: var(--primary-600);*/
+                box-shadow: 0 8px 20px rgba(29,78,216,.22);
+             /*   color:snow*/
+                
             }
 
             .action-btn:active {
@@ -234,7 +242,7 @@
             .action-btn svg {
                 width: 20px;
                 height: 20px;
-                stroke-width: 2.2;
+                stroke-width: 2;
                 fill: none;
                 stroke: currentColor
             }
@@ -252,9 +260,15 @@
         }
 
         .icon--sync {
-            color: #ffffff
+            color: sandybrown
         }
-        /* Giữ trắng như yêu cầu */
+
+        /* ★ CHANGED: style khi ô lý do thiếu dữ liệu */
+        .is-invalid {
+            border-color: var(--red) !important;
+            background: #fff5f5 !important
+        }
+        /* ★ CHANGED */
 
         @@media (max-width:1200px) {
             .form-grid {
@@ -266,6 +280,13 @@
             .form-grid {
                 grid-template-columns: 1fr
             }
+        }
+
+        .btn-outline {
+            --btn-bg: #fff;
+            color: var(--blue2);
+            border: 1px solid rgba(37,99,235,.45);
+            background: var(--btn-bg);
         }
     </style>
 }
@@ -292,11 +313,16 @@
         @Html.Hidden("dep_c", Model.dep_c)
         @Html.Hidden("user", User.Identity.Name)
 
+        <!-- ★ CHANGED: hidden field để giữ action người dùng chọn -->
+        <input type="hidden" id="actionCodeField" name="actionCode" value="" /> <!-- ★ CHANGED -->
+
         <div class="actions-bar">
             @if (canApproveReject)
             {
                 <!-- APPROVE -->
-                <button type="submit" name="actionCode" value="APPROVE" class="action-btn" title="Approve">
+                <!-- ★ CHANGED: đổi type=button và gọi submitAction('APPROVE') -->
+                <button type="button" class="action-btn btn-outline" title="Approve" onclick="submitAction('APPROVE')">
+                    <!-- ★ CHANGED -->
                     <svg class="icon--approve" viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="12" r="9"></circle>
                         <path d="M8 12l2.4 2.4L16 8.8"></path>
@@ -305,8 +331,9 @@
                 </button>
 
                 <!-- REJECT -->
-                <button type="submit" name="actionCode" value="REJECT" class="action-btn" title="Reject"
-                        onclick="return confirm('Are you sure you want to reject this request?');">
+                <!-- ★ CHANGED: type=button + kiểm tra lý do trong JS -->
+                <button type="button" class="action-btn btn-outline" title="Reject" onclick="submitAction('REJECT')">
+                    <!-- ★ CHANGED -->
                     <svg class="icon--reject" viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="12" r="9"></circle>
                         <path d="M9 9l6 6M15 9l-6 6"></path>
@@ -317,7 +344,9 @@
             else if (canSync)
             {
                 <!-- SYNC (icon hình bút) -->
-                <button type="submit" name="actionCode" value="SYNC" class="action-btn" title="Sync">
+                <!-- ★ CHANGED: type=button + dùng submitAction('SYNC') để thống nhất -->
+                <button type="button" class="action-btn btn-outline" title="Sync" onclick="submitAction('SYNC')">
+                    <!-- ★ CHANGED -->
                     <svg class="icon--sync" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 20h9"></path>
                         <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
@@ -327,8 +356,8 @@
             }
 
             <!-- FLOW: luôn hiển thị -->
-            <button type="button" class="action-btn" title="Show flow"
-                    onclick="redirectToStatus('@Model.requestid', '@Model.dep_c','@Model.dep_nm','@Model.site','@Model.factory')">
+            <button type="button" class="action-btn btn-outline" title="Show flow"
+                    onclick="redirectToStatus('@Model.requestid', '@Model.ChangeTitle', '@Model.dep_c','@Model.dep_nm','@Model.site','@Model.factory')">
                 <svg class="icon--flow" viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="5" cy="6" r="2"></circle>
                     <circle cx="12" cy="12" r="2"></circle>
@@ -343,49 +372,39 @@
         </div>
     }
 
+
+    
     <div class="content-grid">
-        <div>
+        <div style="overflow-y: auto; height: 65vh;">
             <div class="card">
                 <div class="card-title">Request Information</div>
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="Category">Category</label>
-                        <input id="Category" type="text" class="form-control" value="@Model.category_nm" readonly />
-                    </div>
 
                     <div class="form-group">
-                        <label for="DocumentCode">Document Code</label>
-                        @Html.TextBoxFor(m => m.DocumentCode, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-
-                    <div class="form-group">
-                        <label for="Version">Version</label>
-                        @Html.TextBoxFor(m => m.version, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-
-                    <div class="form-group" style="grid-column:1 / -1;">
                         <label for="ChangeTitle">Change Title</label>
                         @Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control", @readonly = "readonly" })
                     </div>
 
                     <div class="form-group">
+                        <label for="Category">Category</label>
+                        <input id="Category" type="text" class="form-control" value="@Model.category_nm" readonly />
+                    </div>
+                    <div class="form-group">
                         <label for="Model">Model</label>
                         @Html.TextBoxFor(m => m.Model, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-
-                    <div class="form-group">
-                        <label>Department </label>
-                        <p class="form-control-static">@Model.dep_nm</p>
                     </div>
                     <div class="form-group">
                         <label>Factory</label>
                         <p class="form-control-static">@Model.factory</p>
                     </div>
                     <div class="form-group">
-                        <label>Site</label>
-                        <p class="form-control-static">@Model.site</p>
+                        <label>Department </label>
+                        <p class="form-control-static">@Model.dep_nm</p>
                     </div>
-
+                    <div class="form-group">
+                        <label for="Version">Version</label>
+                        @Html.TextBoxFor(m => m.version, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
                     <div class="form-group">
                         <label>Requester</label>
                         <p class="form-control-static">@Model.pms_i_usr</p>
@@ -397,6 +416,10 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Site</label>
+                        <p class="form-control-static">@Model.site</p>
+                    </div>
+                    <div class="form-group">
                         <label>Status</label>
                         <p class="form-control-static">@Model.status_nm</p>
                     </div>
@@ -405,6 +428,13 @@
                         <label for="Request_detail">Description</label>
                         @Html.TextAreaFor(m => m.Request_detail, new { @readonly = "readonly" })
                     </div>
+
+                    <!-- ★ CHANGED: TÁCH trường "Reason if not Approve" riêng, KHÔNG đụng tới DTO -->
+                    <div class="form-group" style="grid-column:1 / -1;">
+                        <!-- ★ CHANGED -->
+                        <label for="rejectReason">Reason if not Approve</label> <!-- ★ CHANGED -->
+                        <textarea id="rejectReason" name="rejectReason" class="form-control" placeholder="Please provide a reason when rejecting..."></textarea> <!-- ★ CHANGED -->
+                    </div> <!-- ★ CHANGED -->
                 </div>
             </div>
 
@@ -434,26 +464,55 @@
                     </ul>
                 }
             </div>
-
-            <div class="card">
-                <div class="card-title">Notes / Comments</div>
-                <div class="form-group">
-                    <textarea id="Comments" name="Comments" placeholder="Enter an internal note or any additional remarks..."></textarea>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
 @section Scripts{
     <script>
-        function redirectToStatus(changeRequestID, dep_c, dep_nm, site, factory){
-            window.location.href = '@Url.Action("Status", "WorkFlow")'
-                + '?changeRequestID=' + encodeURIComponent(changeRequestID)
-                + '&dep_c=' + encodeURIComponent(dep_c)
-                + '&dep_nm=' + encodeURIComponent(dep_nm)
-                + '&site=' + encodeURIComponent(site)
-                + '&factory=' + encodeURIComponent(factory);
+        // ★ CHANGED: Hàm submit thống nhất, có kiểm tra lý do khi Reject
+        function submitAction(actionCode) {
+            const form = document.getElementById('processForm');
+            const hidden = document.getElementById('actionCodeField');
+            const reasonEl = document.getElementById('rejectReason');
+
+            // Reset trạng thái invalid mỗi lần bấm
+            if (reasonEl) { reasonEl.classList.remove('is-invalid'); }
+
+            if (actionCode === 'REJECT') {
+                const reason = (reasonEl?.value || '').trim();
+                if (!reason) {
+                    alert('Please enter "Reason if not Approve" before rejecting.');
+                    if (reasonEl) {
+                        reasonEl.classList.add('is-invalid');
+                        reasonEl.focus();
+                    }
+                    return false;
+                }
+                if (!confirm('Are you sure you want to reject this request?')) {
+                    return false;
+                }
+            }
+
+            if (actionCode === 'APPROVE') {
+                if (!confirm('Approve this request?')) return false;
+            }
+
+            hidden.value = actionCode;
+            form.submit();
+            return true;
         }
+
+        // hết kiểm tra reject
+
+        function redirectToStatus(changeRequestID, changeTitle, dep_c, dep_nm, site, factory){
+			window.location.href = '@Url.Action("Status", "WorkFlow")'
+				+ '?changeRequestID=' + encodeURIComponent(changeRequestID)
+				+ '&changeTitle=' + encodeURIComponent(changeTitle)
+				+ '&dep_c=' + encodeURIComponent(dep_c)
+				+ '&dep_nm=' + encodeURIComponent(dep_nm)
+				+ '&site=' + encodeURIComponent(site)
+				+ '&factory=' + encodeURIComponent(factory);
+		}
     </script>
 }

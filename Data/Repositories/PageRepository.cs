@@ -74,31 +74,25 @@ namespace Data.Repositories
         /// type: "category" | "status" | "doc" | "title"
         /// SP trả về cột Text, Value (map vào LookupItem).
         /// </summary>
-        //public IEnumerable<LookupItem> GetLookups(
-        //    string type,
-        //    string parentName,
-        //    string childName,
-        //    string userName,
-        //    int? parentId,
-        //    int? childId)
-        //{
-        //    using (var conn = Db.GetConnection())
-        //    {
-        //        return conn.Query<LookupItem>(
-        //            "dbo.PCN_PageLookup", // SP lookup riêng cho dropdown
-        //            new
-        //            {
-        //                Type = type,
-        //                ParentMenuName = parentName,
-        //                ChildMenuName = childName,
-        //                UserName = userName,
-        //                ParentId = parentId,
-        //                ChildId = childId
-        //            },
-        //            commandType: CommandType.StoredProcedure
-        //        );
-        //    }
-        //}
+        public IEnumerable<LookupItem> GetLookups(
+            string type,
+            string plant,
+            string depCode)
+        {
+            using (var conn = Db.GetConnection())
+            {
+                return conn.Query<LookupItem>(
+                    "dbo.PCN_PageLookup", // SP lookup riêng cho dropdown
+                    new
+                    {
+                        Type = type,
+                        Plant=plant,
+                        DepCode=depCode
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
         // ==================== HÀM MỚI (theo Plant + DepCode) ====================
         /// <summary>
         /// Lấy danh sách mặc định cho Query mới theo Plant + DepCode (giống Pending).

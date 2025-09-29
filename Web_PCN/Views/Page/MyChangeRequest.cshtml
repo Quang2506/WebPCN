@@ -8,20 +8,42 @@
     var child = (Session["MenuChildName"] as string) ?? "";
 }
 
+<style>
+
+    .panel-default {
+        border-color: #ddd;
+        width: 76%;
+        margin: auto;
+        /* min-height: 78vh; */
+        overflow-y: auto;
+        height: 78vh;
+    }
+    .btn-outline {
+        --btn-bg: #fff;
+        color: var(--blue2);
+        border: 1px solid rgba(37,99,235,.45);
+        background: var(--btn-bg);
+    }
+
+    /*.panel-body {
+        overflow-y: auto;
+        height: 57vh;
+    }*/
+</style>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h2>@ViewBag.HeaderName</h2>
+        <strong>My Change Request</strong>
         @*<strong>Pending request</strong>*@
         @*<div class="pull-right">
-                <a class="btn btn-primary btn-xs"
-                   href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
-                    Create new request
-                </a>
-                <a class="btn btn-default btn-xs"
-                   href="@Url.Action("Query", "Page", new { p = parent, c = child })">
-                    Query
-                </a>
-            </div>*@
+            <a class="btn btn-primary btn-xs"
+               href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
+                Create new request
+            </a>
+            <a class="btn btn-default btn-xs"
+               href="@Url.Action("Query", "Page", new { p = parent, c = child })">
+                Query
+            </a>
+        </div>*@
         <div class="clearfix"></div>
     </div>
 
@@ -33,28 +55,31 @@
             <table class="table table-bordered table-hover table-condensed">
                 <thead>
                     <tr class="info">
-                        <th style="width:160px;">DocumentCode</th>
-                        <th style="width:90px;">Version</th>
-                        <th style="width:90px;">Model</th>
-                        <th>Change title</th>
-                        <th style="width:150px;">Department</th>
-                        <th style="width:150px;">Factory</th>
-                        <th style="width:150px;">Status</th>
+                        <th style="width:300px;">Change title</th>
+                        <th style="width:160px;">Category</th>
+                        <th style="width:30px;">Version</th>
+                        <th style="width:30px;">Model</th>
+
+                        <th style="width:30px;">Department</th>
+                        <th style="width:30px;">Factory</th>
+                        <th style="width:130px;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var r in Model)
                     {
                         <tr>
+
                             <td>
                                 <a href="@Url.Action("ViewMyChangeRequest","ChangeRequest",new { requestid = r.requestid })">
-                                    @r.DocumentCode
+                                    @r.ChangeTitle
                                 </a>
                                 @*<a>#@r.DocumentCode</a>*@
                             </td>
+                            <td>@r.category_nm</td>
                             <td>@r.version</td>
                             <td>@r.Model</td>
-                            <td class="text-danger">@r.ChangeTitle</td>
+
                             <td>@r.dep_nm</td>
                             <td>@r.factory</td>
                             <td class="text-danger">@r.status_nm</td>

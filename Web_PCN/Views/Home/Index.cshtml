@@ -16,478 +16,417 @@
             .Select(x => x.Dept).Distinct().OrderBy(x => x).ToList();
 
     Func<string, string, Core.Dtos.DeptCell> CellOf = (ln, dp) =>
-         (Model != null && Model.Grid != null
-             ? Model.Grid.FirstOrDefault(x =>
-                 string.Equals(x.Line, ln, StringComparison.OrdinalIgnoreCase) &&
-                 string.Equals(x.Dept, dp, StringComparison.OrdinalIgnoreCase))
-             : null
-         );
+        (Model?.Grid ?? Enumerable.Empty<Core.Dtos.DeptCell>())
+        .FirstOrDefault(x =>
+            string.Equals(x.Line, ln, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(x.Dept, dp, StringComparison.OrdinalIgnoreCase));
 
     var plant = string.IsNullOrWhiteSpace(Model?.Plant) ? "QSMC" : Model.Plant.ToUpperInvariant();
-    var otherPlant = plant == "QSMC" ? "QMH" : "QSMC";
 
-    var syncQSMC = Model?.SyncRate_QSMC ?? 0;
-    var syncQMH = Model?.SyncRate_QMH ?? 0;
+    var syncQSMC = Math.Max(0, Math.Min(100, Model?.SyncRate_QSMC ?? 0));
+    var syncQMH = Math.Max(0, Math.Min(100, Model?.SyncRate_QMH ?? 0));
     var nsQSMC = Model?.NotSynced_QSMC ?? 0;
     var nsQMH = Model?.NotSynced_QMH ?? 0;
     var Total = Model?.Total ?? 0;
+    var nsTotal = nsQSMC + nsQMH;
 }
 
 <style>
     :root {
-        --green: #43be57;
-        --green-deep: #2ea34a;
-        --red: #c94545;
-        --red-deep: #b33636;
+        /* ===== PALETTE khớp hình ===== */
+        --page: #f6f8fb;
+        /* Card xanh nhạt (Sync) */
+        --card-green-bg: #eaf7ed;
+        --card-green-border: #d9efdf;
+        --percent-green: #2dba63;
+        --bar-track: #dff2e4;
+        --bar-fill: #2dba63;
+        /* Card đỏ (Not Synced) */
+        --card-red-bg: #e25757;
+        --card-red-text: #ffffff;
+        /* Bảng */
         --teal: #7fc4cf;
         --teal-weak: #cfe8eb;
-        --ok: #2fae46;
-        --ok-ring: #79e09a;
-        --ng: #e25555;
-        --ng-ring: #ffc2c2;
-        --gray-ring: #e2e8f0;
-        --page: #edf2f6;
+        --row-title: #94a3b8;
+        /* Icon tick/x */
+        --ok: #2dba63;
+        --ng: #e25757;
+        /* Tabs */
+        --tab-active-bg: #1f2937;
+        --tab-active-text: #ffffff;
+        --tab-inactive-bg: #f1f5f9;
+        --tab-inactive-text: #111827;
+        --tab-border: #e2e8f0;
     }
 
     html, body {
         background: var(--page);
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif !important;
     }
 
     * {
         box-sizing: border-box;
+        font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif
     }
-
     .wrap {
-        max-width: 1240px;
-        margin: 24px auto;
-        padding: 0 16px;
-        font-family: "Helvetica Neue",Arial,sans-serif;
-        height: 90%
+        background: #fff;
+        max-width: 100%;
+        width: 76%;
+        margin: 0px auto;
+        /* padding: 0 16px; */
+        box-shadow: 0 12px 28px rgba(0, 0, 0, .06);
+        height: 100%;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        /* align-items: flex-start; */
+        justify-content: flex-start;
     }
 
-    .summary-row {
+    /* ===== 3 THẺ TỔNG QUAN ===== */
+    /* .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 100px;
+            padding-top:25px
+        }*/
+
+    .card {
+        border-radius: 18px;
+        padding: 1rem 1rem;
+        box-shadow: 0 10px 24px rgba(0,0,0,.06);
+        width: 32%;
+        height:100%;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-around
+
+    }
+
+
+    .cards {
+        /* display: grid
+    ; */
+        grid-template-columns: 2.5fr 2.5fr 2.5fr;
+        gap: 30px;
+        padding-top: 25px;
         display: flex;
+        padding: 25px 16px;
+        width: 100%;
         justify-content: space-between;
-        gap: 24px;
-        margin: 0 12px 18px;
-        margin-top: 30px
+        height: 38%
     }
 
-    .summary {
-        flex: 1 1 0;
-        display: flex;
-        align-items: stretch;
-        gap: 20px;
-        padding: 18px 24px;
-        min-height: 148px;
-        border-radius: 28px;
-        color: #fff;
-        position: relative;
+    .card--green {
+        background: var(--card-green-bg);
+        border: 1px solid var(--card-green-border)
+    }
+
+    .card--red {
+        background: var(--card-red-bg);
+        color: var(--card-red-text)
+    }
+
+    .card__title {
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 8px;
+        text-align: center;
+        color: #1A8939;
+    }
+
+    .card__percent {
+        font-weight: 600;
+        font-size: 48px;
+        line-height: 1.05;
+        color: var(--percent-green);
+        text-align: center;
+        color: #1A8939;
+    }
+
+    .card__bar {
+        height: 8px;
+        background: var(--bar-track);
+        border-radius: 6px;
         overflow: hidden;
-        box-shadow: inset 0 -10px 0 rgba(0,0,0,.05)
+        margin: 10px 0 6px
     }
 
-    .summary--ok {
-        background: linear-gradient(180deg,var(--green) 0%, var(--green-deep) 100%);
-        border: 3px solid rgba(255,255,255,.28);
+        .card__bar > i {
+            display: block;
+            height: 100%;
+            background: var(--bar-fill);
+            width: 0%
+        }
+
+    .card__total {
+        font-weight: 700;
+        font-size: 14px;
+        color: #384B56;
+        text-align: center;
+        padding-top: 10px
     }
 
-    .summary--bad {
-        background: linear-gradient(180deg,var(--red) 0%, var(--red-deep) 100%);
-        border: 3px solid rgba(255,255,255,.22);
+
+    .card--red .card__title, .card--red .card__total {
+        color: var(--card-red-text)
     }
 
-    .summary__title {
-        flex: 0 0 180px;
+    .card__ns-grid {
         display: flex;
-        align-items: center;
+        justify-content: space-around;
+        /* gap: 24px; */
+        /* margin-top: 2px; */
+        margin-bottom: 2rem;
+    }
+
+    .card__ns-big {
+        font-size: 48px;
+        font-weight: 600;
+        line-height: 1
+    }
+
+    .card__ns-col {
+        display: flex;
+        flex-direction: column;
+        gap: 2px
+    }
+
+    .card__ns-num {
         font-size: 28px;
         font-weight: 900;
-        line-height: 1.1;
+        line-height: 1
     }
 
-    .summary__stats {
-        flex: 1 1 auto;
-        display: grid;
-        grid-template-columns: repeat(2,minmax(0,1fr));
-        gap: 18px;
-        align-items: stretch;
+    .card__ns-label {
+        font-weight: 600;
+        font-size: 25px;
+        opacity: .95
     }
 
-    .stat-box {
-        height: 100%;
+    /* ===== Tabs QMH | QSMC ===== */
+    .tabs {
+        display: flex;
+        justify-content: center;
+        /*margin-top: 10px*/
+        height: 7%
+    }
+
+    .tab {
+        padding: 8px 18px;
+        border: 1px solid var(--tab-border);
+        background: var(--tab-inactive-bg);
+        color: var(--tab-inactive-text);
+        font-weight: 700;
+        text-align: center;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: rgba(255,255,255,.06);
-        border: 2px dashed rgba(255,255,255,.85);
-        border-radius: 18px;
-        padding: 18px 22px;
-        position: relative;
     }
 
-    .stat-box__plant {
-        font-size: 20px;
-        font-weight: 900;
-        color: #fff;
-    }
+        .tab:first-child {
+            border-radius: 10px 0 0 10px
+        }
 
-    .stat-box__value {
-        font-size: 58px;
-        font-weight: 900;
-        line-height: 1;
-        margin-top: 6px;
-        color: #fff;
-    }
+        .tab:last-child {
+            border-radius: 0 10px 10px 0;
+            border-left: none
+        }
 
-    .stat-box .unit {
-        font-size: 22px;
-        font-weight: 800;
-        margin-left: 6px;
-        color: #fff;
-    }
+        .tab.active {
+            background: #6092E0;
+            color: var(--tab-active-text)
+        }
 
-    .stat-box__suffix {
-        position: absolute;
-        right: 20px;
-        bottom: 14px;
-        font-weight: 800;
-        color: #fff;
-    }
 
+
+    /* ===== Bảng ma trận ===== */
     .matrix {
-        background: #fff;
-        border-radius: 12px;
+        /* background: #fff;*/
+        /*  border-radius: 12px;*/
         padding: 16px 18px;
-        margin: 10px 12px;
-        margin-top: 60px;
-        box-shadow: 0 12px 28px rgba(0,0,0,.06);
-        overflow-x: auto;
+        /* margin-top: 10px;*/
+       /* box-shadow: 0 12px 28px rgba(0,0,0,.06);*/
+        overflow: auto;
+        height: 40%;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between
+            
     }
 
         .matrix table {
             width: 100%;
             border-collapse: collapse;
-            font-weight: 700;
             color: #05313c;
+            font-weight: 700;
+            border-collapse: separate; /* cần thiết để border-radius hoạt động */
+            border-spacing: 0;
+            border-radius: 10px; /* bo góc 10px */
+            overflow: hidden; /* giúp bo góc hiển thị đúng */
+            border: 1px solid #ccc; /* viền bảng */
+            table-layout: fixed;
+          /*  box-shadow: 0 12px 28px rgba(0,0,0,.06);*/
         }
 
         .matrix thead th {
-            background: var(--teal);
-            color: #fff;
-            padding: 12px 10px;
-            font-weight: 900;
-            border: 1px solid var(--teal-weak);
+            color: #263147;
+            background: #FAFBFD;
+            padding: 10px;
+            border: 1px solid #E6E8E9;
             text-align: center;
-            height: 56px;
+            height: 10%;
+            width: auto
         }
 
-            .matrix thead th:first-child, .matrix tbody th:first-child {
-                background: var(--teal);
-                color: #fff;
-                font-weight: 900;
-            }
+        .matrix tbody th {
+            /* background: var(--row-title); */
+            background: #f9fafb;
+            color: #263147;
+            border: 1px solid #E6E8E9;
+            height: 10%;
+            width: auto
+        }
 
-        .matrix td, .matrix th {
-            border: 1px solid var(--teal-weak);
-            height: 66px;
-            vertical-align: middle;
+        .matrix td {
+            border: 1px solid #E6E8E9;
+            height: 10%;
             text-align: center;
+            width: auto
         }
 
             .matrix th:first-child, .matrix td:first-child {
-                width: 170px;
+                width: 160px
             }
 
+    th {
+        text-align: center;
+        width: auto
+    }
+
+    /* Icon tick / cross trong bảng */
     .icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 44px;
-        height: 44px;
+        /* width: 60%; */
+        /* height: 60%; */
+        padding: 0.7rem;
         border-radius: 50%;
-        border: 2px solid transparent;
-        box-shadow: 0 6px 14px rgba(15,23,42,.14);
-        transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
     }
 
-    .icon-circle {
+    .icon_Sm {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        box-shadow: 0 3px 8px rgba(0,0,0,.08);
-        background: #fff;
+        width: 20px;
+        height: auto;
+        border-radius: 50%
     }
 
-
-    /* icon có quyền */
     .icon--ok {
-        background: #1fb855; /* xanh đậm */
-        border-color: #14a248;
-        color: #fff;
+        background: var(--ok);
+        color: #fff
     }
 
     .icon--ng {
-        background: #d83a3a; /* đỏ thẫm */
-        border-color: #c22e2e;
-        color: #fff;
-    }
-    /* icon không có quyền nhưng vẫn giữ màu, chỉ làm mờ */
-    .icon--disabled {
-        opacity: 0.9; /* làm mờ */
-        filter: grayscale(40%); /* hơi giảm độ tươi */
-        cursor: not-allowed;
+        background: var(--ng);
+        color: #fff
     }
 
-
-    .icon-gray {
-        border: 3px solid var(--gray-ring);
-        color: #94a3b8;
-        background: #f8fafc;
-    }
-
-    .icon-ok svg path {
-        stroke: #fff;
-    }
-
-    .icon-ng svg path {
-        stroke: currentColor;
-    }
-
-    .icon-gray svg path {
-        stroke: #94a3b8;
-    }
-
-    .disabled {
-        opacity: .45;
-        cursor: not-allowed;
-    }
-
-
-    .icon--ok svg path,
-    .icon--ng svg path {
-        stroke: #ffffff !important;
-    }
-
-    .icon--disabled svg path {
-        stroke: #6b7280 !important;
-    }
-    /* hiệu ứng hover cho ô có quyền */
-    a.icon-link:hover .icon {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(15,23,42,.22);
-    }
-
-    /*.footer-bar {
-        height: 36px;
-        background: #8ecad4;
-        border-radius: 8px;
-        margin: 20px 12px 0;
+    /* Legend */
+    .legend {
         display: flex;
+        gap: 5px;
         align-items: center;
         justify-content: center;
-        color: #052a33;
-        font-weight: 800;
-    }*/
-
-    .plant-bottom {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 10px;
-        margin: 10px 12px 0 12px;
+        
     }
 
-    .plant-label {
-        color: #334155;
-        font-weight: 800;
-    }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-block
+        }
 
-    .btn-plant {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
-        background: #fff;
-        color: #0f172a;
-        text-decoration: none;
-        font-weight: 700;
-    }
+        .legend .l-ok {
+            background: var(--ok)
+        }
 
-        .btn-plant:hover {
-            box-shadow: 0 3px 12px rgba(16,24,40,.12);
+        .legend .l-ng {
+            background: var(--ng)
         }
 
 
-
-
-
-
-
-    .label {
-        font-weight: 800;
-        font-size: 18px;
-        letter-spacing: .5px;
-        margin-bottom: 6px;
-        opacity: .95;
-    }
-
-    .percent {
-        font-weight: 900;
-        font-size: 56px;
-        line-height: 1;
-        color: #F9F9F9
-    }
-
-    .sync-card-S {
-        background: #63D665;
-        border-radius: 28px;
-        box-shadow: 0 6px 0 #63D665;
-        padding: 18px 22px 20px;
-        max-height: 170px;
-        width: 50%;
-    }
-
-    .sync-card-D {
-        background: #C53136;
-        border-radius: 28px;
-        box-shadow: 0 6px 0 var(--red-deep);
-        padding: 18px 22px 20px;
-        width: 50%;
-        max-height: 170px
-    }
-
-    .sync-title {
-        font-weight: 800;
-        font-size: 20px;
-        line-height: 1;
-        margin-bottom: 14px;
-        color: #F9F9F9
-    }
-
-    .sync-grid {
+    .displayplex {
+        margin-right: 20px;
         display: flex;
-        gap: 16px;
-    }
-
-    .sync-box {
-        flex: 1;
-        /*border: 2px dashed var(--border-dash);*/
-        border-radius: 18px;
-        padding: 1px 18px 16px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
+        height: 30px;
+        /*  width: 70px;*/
         align-items: center;
-        justify-content: center;
-        position: relative;
-        border: 2px dashed #F9F9F9;
+        justify-content: space-between;
+        /* justify-items: revert-layer; */
+        /* align-content: start; */
     }
 
-    /* viền đứt bên trong */
-    /*.sync-box::after {
-            content: "";
-            position: absolute;
-            inset: 6px;
-            border: 2px dashed var(--border-dash);
-            border-radius: 12px;
-            pointer-events: none;
-        }*/
 
-    .label {
-        font-weight: 800;
-        font-size: 18px;
-        margin-bottom: 6px;
-    }
+   
 
-    .number {
-        font-weight: 900;
-        font-size: 48px;
-        line-height: 1;
-    }
-
-    .items {
-        font-weight: 700;
-        font-size: 20px;
-        color: #F9F9F9
-    }
-
-    .plant-switch {
-        display: flex;
-        overflow: hidden;
-        width: 100%;
-        justify-content: center;
-        margin-top: 30px
-    }
-
-    .switch-btn {
-        padding: 6px 16px;
-        font-weight: 600;
-        text-decoration: none;
-        font-size: 13px;
-        transition: .2s;
-        background: #f3f4f6;
-        color: #374151;
-        background: #F9F9F9 !important;
-        border: 1px solid #ccc;
-        /*border-radius: 6px;*/
-    }
-
-        .switch-btn.active {
-            background: #8ecad4 !important; /* xanh khi chọn */
-            color: #fff;
-        }
-
-        .switch-btn.inactive {
-            background: #e5e7eb; /* xám nhạt khi không chọn */
-            color: #6b7280;
-        }
 </style>
 
 <div class="wrap">
-    <div class="summary-row">
 
-        <div class="sync-card-S">
-            <div class="sync-title"> <span>Sync Rate:</span><span style="float: right;">Total: @Total</span></div>
-            <div class="sync-grid">
-                <div class="sync-box">
-                    <div class="label">QSMC</div>
-                    <div class="percent"> @syncQSMC <span>%</span> </div>
-                </div>
-                <div class="sync-box">
-                    <div class="label">QMH</div>
-                    <div class="percent"> @syncQMH <span>%</span> </div>
-                </div>
-            </div>
+    <!-- ===== SUMMARY CARDS ===== -->
+    <div class="cards">
+        <!-- QSMC Sync -->
+        <div class="card card--green">
+            <div class="card__title">QSMC Sync Rate</div>
+            <div class="card__percent">@syncQSMC%</div>
+            <div class="card__bar"><i style="width:@($"{syncQSMC}%")"></i></div>
+            <div class="card__total">Total: @Total</div>
         </div>
 
-        <div class="sync-card-D">
-            <div class="sync-title">Not Synced:</div>
-            <div class="sync-grid">
-                <div class="sync-box">
-                    <div class="label">QSMC</div>
-                    <span class="percent">@nsQSMC <span class="items">Items</span></span>
+        <!-- QMH Sync -->
+        <div class="card card--green">
+            <div class="card__title">QMH Sync Rate</div>
+            <div class="card__percent">@syncQMH%</div>
+            <div class="card__bar"><i style="width:@($"{syncQMH}%")"></i></div>
+            <div class="card__total">Total: @Total</div>
+        </div>
 
+        <!-- Not Synced -->
+        <div class="card card--red">
+            <div class="card__title">Not Synced</div>
+            <div class="card__ns-grid">
+                @*<div class="card__ns-big">@nsTotal</div>*@
+
+                <div class="card__ns-col">
+                    <div class="card__ns-big">@nsQSMC<span style="font-size:15px;font-weight:500">Items</span> </div>
+                    <div class="card__ns-label">QSMC</div>
                 </div>
-                <div class="sync-box">
-                    <div class="label">QMH</div>
-
-                    <span class="percent">@nsQMH <span class="items">Items</span></span>
-
+                <div class="card__ns-col">
+                    <div class="card__ns-big">@nsQMH<span style="font-size:15px;font-weight:500">Items</span></div>
+                    <div class="card__ns-label">QMH</div>
                 </div>
             </div>
+            @*<div class="card__total" style="color: #FFE3DD;font-weight:200;font-size:16px;text-align:center ;margin-top:5px">Items pending across site</div>*@
         </div>
     </div>
 
+    <!-- ===== SWITCH PLANT (tabs) ===== -->
+    <div class="tabs">
+        <a class="tab @(plant=="QMH" ? "active" : "")" href="@Url.Action("Index","Home", new { plant="QMH" })">QMH</a>
+        <a class="tab @(plant=="QSMC" ? "active" : "")" href="@Url.Action("Index","Home", new { plant="QSMC" })">QSMC</a>
+    </div>
 
+    <!-- ===== MATRIX ===== -->
     <div class="matrix">
-        <table>
+        <table style="height:100%">
             <thead>
-                <tr>
-                    <th style="background:#94a3b8">@plant</th>
+                <tr>             
+                    <th style="color: #6092E0">@plant</th>
                     @foreach (var c in cols)
                     {
                         <th>@c</th>
@@ -508,45 +447,25 @@
                                 ; continue;
                             }
 
-                            // Xác định class icon: có quyền => xanh/đỏ; không quyền => xám
-                            var iconClass = cell.CanClick
-                                ? (cell.IsDone ? "icon icon--ok" : "icon icon--ng")
-                                : (cell.IsDone ? "icon icon--ok icon--disabled" : "icon icon--ng icon--disabled");
-
-                            // Dựng URL CHUẨN tới Pending (đừng Replace chuỗi)
-                            // Nếu app của bạn là PageController ➜ Pending(string p,string c,string plant,string dep,int? pid,int? cid)
                             var pendingUrl = cell.CanClick
-                                        ? Url.Action(
-                                            "Query",           // action
-                                            "Page",              // controller
-                                            new
-                                            {
-
-                                                plant = Model.Plant,
-                                                dep = cell.GroupDep,
-                                            })
-                                        : "#";
-
-
-
-                            // SVG icon (✓/✕). Không quyền vẫn vẽ icon nhưng là màu xám do class .icon--disabled
-                            Func<IHtmlString> drawIcon = () => new HtmlString(
-                                cell.IsDone
-                                ? @"<svg width=""22"" height=""22"" viewBox=""0 0 24 24"" fill=""none""><path d=""M20 7L9 18l-5-5"" stroke-width=""3"" stroke-linecap=""round"" stroke-linejoin=""round""/></svg>"
-                                : @"<svg width=""22"" height=""22"" viewBox=""0 0 24 24"" fill=""none""><path d=""M6 6l12 12M18 6L6 18"" stroke-width=""3"" stroke-linecap=""round""/></svg>"
-                            );
+                              ? Url.Action("Query", "Page", new { plant = Model.Plant, dep = cell.GroupDep })
+                              : "#";
 
                             <td>
                                 @if (cell.CanClick)
                                 {
-                                    <a class="icon-link" href="@pendingUrl" title="@($"{ln} - {dp}")" aria-label="@($"{ln} - {dp}")">
-                                        <div class="@iconClass">@drawIcon()</div>
+                                    <a href="@pendingUrl" title="@($"{ln} - {dp}")" class="icon @(cell.IsDone ? "icon--ok" : "icon--ng")" aria-label="@($"{ln} - {dp}")">
+                                        @Html.Raw(cell.IsDone
+                                          ? @"<svg width='18' height='18' viewBox='0 0 24 24' fill='none'><path d='M20 7L9 18l-5-5' stroke='#fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+                                          : @"<svg width='18' height='18' viewBox='0 0 24 24' fill='none'><path d='M6 6l12 12M18 6L6 18' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>")
                                     </a>
                                 }
                                 else
                                 {
-                                    <div class="@iconClass" title="You do not have permission for this item" aria-disabled="true">
-                                        @drawIcon()
+                                    <div class="icon @(cell.IsDone ? "icon--ok" : "icon--ng")" aria-disabled="true" title="No permission">
+                                        @Html.Raw(cell.IsDone
+                                          ? @"<svg width='18' height='18' viewBox='0 0 24 24' fill='none'><path d='M20 7L9 18l-5-5' stroke='#fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+                                          : @"<svg width='18' height='18' viewBox='0 0 24 24' fill='none'><path d='M6 6l12 12M18 6L6 18' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>")
                                     </div>
                                 }
                             </td>
@@ -555,18 +474,15 @@
                 }
             </tbody>
         </table>
+
+        <!-- Legend -->
+
     </div>
 
-    <!-- Switch plant dưới bảng -->
+    <div class="legend " style="height:10%">
+        <div class="displayplex" style="width:70px;margin-right:30px;margin-top:20px"> <span class="icon_Sm icon--ok"><svg width='18' height='18' viewBox='0 0 24 24' fill='none'><path d='M20 7L9 18l-5-5' stroke='#fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' /></svg></span> <span>Synced</span></div>
+        <div class="displayplex" style="width: 100px; margin-top: 20px">  <span class="icon_Sm icon--ng"><svg width='18' height='18' viewBox='0 0 24 24' fill='none'><path d='M6 6l12 12M18 6L6 18' stroke='#fff' stroke-width='3' stroke-linecap='round' /></svg></span>  <span>Not Synced</span></div>
 
-    <div class="plant-switch">
-        <a href="@Url.Action("Index","Home", new { plant="QMH" })"
-           class="switch-btn @(Model.Plant=="QMH" ? "active" : "inactive")">
-            QMH
-        </a>
-        <a href="@Url.Action("Index","Home", new { plant="QSMC" })"
-           class="switch-btn @(Model.Plant=="QSMC" ? "active" : "inactive")">
-            QSMC
-        </a>
     </div>
+
 </div>

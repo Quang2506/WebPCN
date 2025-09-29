@@ -19,7 +19,7 @@ namespace Web_PCN.Controllers
         }
 
         [HttpGet]
-        public ActionResult Status(string changeRequestID, string dep_c, string dep_nm, string site, string factory)
+        public ActionResult Status(string changeRequestID, string changeTitle, string dep_c, string dep_nm, string site, string factory)
         {
             if (Session["UserName"] == null)
             {
@@ -31,6 +31,7 @@ namespace Web_PCN.Controllers
             var data = _WorkFlow.GetJobStatusHistory(changeRequestID, dep_c);
 
             ViewBag.ChangeRequestID = changeRequestID;
+            ViewBag.ChangeRequestTitle = changeTitle;
             ViewBag.Dep_c = dep_c;
             ViewBag.Dep_nm = dep_nm;
             ViewBag.Site = site;

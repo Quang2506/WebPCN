@@ -4,20 +4,39 @@
         Layout = "~/Views/Shared/_Layout.cshtml";
 
         // Lấy breadcrumb (đã set ở controller)
-        var parent = (Session["MenuParentName"] as string) ?? "";
-        var child = (Session["MenuChildName"] as string) ?? "";
+        var plant = (Session["Site"] as string) ?? "";
+        var dep_c = (Session["Dept"] as string) ?? "";
+
     }
+<style>
+
+    .panel-default {
+        border-color: #ddd;
+        width: 76%;
+        margin: auto;
+        /* min-height: 78vh; */
+        overflow-y: auto;
+        height: 78vh;
+    }
+/*    .panel-body {
+        overflow-y: auto;
+        height: 57vh;
+    }*/
+    
+
+</style>
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <strong>Pending request</strong>
+            <strong>My Tasks</strong>
             <div class="pull-right">
-                <a class="btn btn-primary btn-xs"
+                @*<a class="btn btn-primary btn-xs"
                    href="@Url.Action("ChangeRequestCreate", "ChangeRequest")">
                     Create new request
-                </a>
-                <a class="btn btn-default btn-xs"
-                   href="@Url.Action("Query", "Page", new { p = parent, c = child })">
+                </a>*@
+                <a @*class="btn btn-default btn-xs"*@
+                   style="font-weight:700"
+                   href="@Url.Action("Query", "Page", new { plant ="QMH", dep = dep_c })">
                     Query
                 </a>
             </div>
@@ -32,16 +51,14 @@
                 <table class="table table-bordered table-hover table-condensed">
                     <thead>
                         <tr class="info">
-                            <th style="width:160px;">DocumentCode</th>
-                            <th style="width:90px;">Version</th>
-                            <th style="width:90px;">Model</th>
-                            <th>Change title</th>
-                            <th style="width:150px;">Department</th>
-                            <th style="width:150px;">Factory</th>
-                            <th style="width:150px;">Site</th>
-
-
-                            <th style="width:150px;">Status</th>
+                            <th style="width:300px;">Change title</th>
+                            <th style="width:160px;">Category</th>
+                            <th style="width:30px;">Version</th>
+                            <th style="width:30px;">Model</th>
+                            <th style="width:30px;">Site</th>
+                            <th style="width:30px;">Department</th>
+                            <th style="width:30px;">Factory</th>
+                            <th style="width:130px;">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,17 +67,17 @@
                             <tr>
                                 <td>
                                     <a href="@Url.Action("ChangeRequestDetail","ChangeRequest",new { requestid = r.requestid, dep_c = r.dep_c })">
-                                        @r.DocumentCode
+                                        @r.ChangeTitle
                                     </a>
                                     @*<a>#@r.DocumentCode</a>*@
                                 </td>
+                                <td>@r.category_nm</td>
                                 <td>@r.version</td>
                                 <td>@r.Model</td>
-                                <td class="text-danger">@r.ChangeTitle</td>
+                                <td>@r.site</td>
                                 <td>@r.dep_nm</td>
                                 <td>@r.factory</td>
-                                <td>@r.site</td>
-
+                               
                                 <td class="text-danger">@r.status_nm</td>
                             </tr>
                         }

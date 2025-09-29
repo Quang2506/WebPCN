@@ -24,20 +24,17 @@ namespace Services
             return _repo.QueryChangeRequests(p, c, user, category, doc, title, status, parentId, childId);
         }
         // Lookup (category/status/doc/title) theo menu
-        //public IEnumerable<SelectListItem> GetOptionList(
-        //    string optionType,                // "category" | "status" | "doc" | "title"
-        //    string parentName, string childName,
-        //    string userName,
-        //    int? parentId, int? childId)
-        //{
-        //    var rows = _repo.GetLookups(optionType, parentName, childName, userName, parentId, childId);
-        //    // Map sang SelectListItem
-        //    return rows.Select(x => new SelectListItem
-        //    {
-        //        Value = string.IsNullOrWhiteSpace(x.Value) ? x.Text : x.Value,
-        //        Text = string.IsNullOrWhiteSpace(x.Text) ? x.Value : x.Text
-        //    }).ToList();
-        //}
+        public IEnumerable<SelectListItem> GetOptionList(
+            string type,string plant ,string depCode)
+        {
+            var rows = _repo.GetLookups(type,plant,depCode);
+            // Map sang SelectListItem
+            return rows.Select(x => new SelectListItem
+            {
+                Value = string.IsNullOrWhiteSpace(x.Value) ? x.Text : x.Value,
+                Text = string.IsNullOrWhiteSpace(x.Text) ? x.Value : x.Text
+            }).ToList();
+        }
         // ================== HÀM MỚI (theo PLANT + DEP_CODE) ==================
         /// <summary>
         /// Danh sách mặc định cho Query (giống Pending) theo Plant + DepCode.

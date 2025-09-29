@@ -240,5 +240,33 @@ namespace Data.Repositories
                 return conn.QueryFirstOrDefault<int?>(sql, new { requestid });
             }
         }
+
+        /* ============================ DELETE (tích hợp vào SP CREATE) ============================ */
+        public ReturnMessageResult DeleteViaCreateSp(string requestid, string user)
+        {
+            using (var conn = Db.GetConnection())
+            {
+                return conn.QueryFirstOrDefault<ReturnMessageResult>(
+                    "dbo._PCN_CreateNewRequest",
+                    new
+                    {
+                        Action = "DELETE",
+                        requestid = requestid,
+                        category = (string)null,
+                        ChangeTitle = (string)null,
+                        Model = (string)null,
+                        DocumentCode = (string)null,
+                        version = (string)null,
+                        Request_detail = (string)null,
+                        group_dept = (string)null,
+                        user = user,
+                        JsonFileNames = (string)null,
+                        FileNames = (string)null
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+
     }
 }

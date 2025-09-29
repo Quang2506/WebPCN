@@ -5,10 +5,12 @@
 <style>
     /* --- form: 2 cột --- */
     .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2,1fr);
+        display: flex;
+        /*  grid-template-columns: repeat(2,1fr);*/
         gap: 16px 20px;
-        margin-bottom: 16px
+        margin-bottom: 16px;
+        height: 90%;
+        justify-content: flex-start
     }
 
     .form-group label {
@@ -40,7 +42,7 @@
 
     .form-actions {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         margin-top: 8px
     }
     /* --- empty state --- */
@@ -75,6 +77,34 @@
         .empty p {
             margin: 0
         }
+
+    .form-group {
+        margin-bottom: 15px;
+        width: 30% !important;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+        margin-right: 30px;
+    }
+
+
+    .panel-default {
+        border-color: #ddd;
+        width: 76%;
+        margin: auto;
+        /* min-height: 78vh; */
+       overflow-y: auto;
+        height: 78vh;
+    }
+   /* .table {
+        overflow-y: auto;
+        height: 57vh;
+    }*/
+
+  
 </style>
 <div class="panel panel-default">
     <div class="panel-heading"><strong>View Change Request</strong></div>
@@ -99,12 +129,15 @@
                 </div>
                 <div class="form-group">
                     <label>Status</label>
-                    @Html.TextBoxFor(m => m.Status, new { @class = "form-control", placeholder = "Enter status..." })
+                    @Html.DropDownListFor(m => m.Status,
+                    Model.StatusList ?? Enumerable.Empty<System.Web.Mvc.SelectListItem>(),
+                    "-- All Status --",
+                    new { @class = "form-control" })
                 </div>
-                <div class="form-group">
+                @*<div class="form-group">
                     <label>Document code</label>
                     @Html.TextBoxFor(m => m.DocumentCode, new { @class = "form-control", placeholder = "Enter document code..." })
-                </div>
+                </div>*@
                 <div class="form-group">
                     <label>Change title</label>
                     @Html.TextBoxFor(m => m.ChangeTitle, new { @class = "form-control", placeholder = "Enter change title..." })
@@ -121,30 +154,34 @@
             <table class="table table-bordered table-hover table-condensed">
                 <thead>
                     <tr class="info">
-                        <th style="width:160px;">Document code</th>
-                        <th style="width:90px;">Category</th>
-                        <th style="width:90px;">Version</th>
                         <th>Change title</th>
-                        <th style="width:150px;">Department</th>
-                        <th style="width:150px;">Status</th>
-                        <th style="width:150px;">TransDateTime</th>
+
+                        <th>Category</th>
+                        <th style="width:50px;">Version</th>
+                        <th style="width:50px;">Model</th>
+                        <th style="width:100px;">Department</th>
+                        <th style="width:50px;">Factory</th>
+                        <th style="width: 130px;">Status</th>
+                        <th style="width: 90px;">TransDateTime</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var r in Model.Results)
                     {
                         <tr>
+
                             <td>
                                 <a href="@Url.Action("ChangeRequestDetail","ChangeRequest",
                                        new { requestid = r.RequestID, dep_c = r.Department })">
-                                    @r.Code
+                                    @r.ChangeTitle
                                 </a>
                             </td>
                             <td>@r.Category</td>
-                            <td>@r.Version</td>
-                            <td>@r.ChangeTitle</td>
+                            <td style=" text-align: center">@r.Version</td>
+                            <td>@r.Model</td>
                             <td>@r.Department</td>
-                            <td>@r.Status</td>
+                            <td>@r.Factory</td>
+                            <td style="color: #a94442">@r.Status</td>
                             <td>@r.TransDateTime</td>
                         </tr>
                     }
@@ -154,7 +191,7 @@
         else
         {
             <div class="empty">
-                <div class="emoji">🗂️</div>
+                @*<div class="emoji">🗂️</div>*@
                 <h5>No data found</h5>
 
             </div>
